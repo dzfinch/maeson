@@ -1,7 +1,5 @@
 # MAESon: Machine Learning and Artificial Intelligence for Earth Science 🌍🤖  
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/dzfinch/maeson/blob/main/lab_notebook.ipynb)
-
 **MAESon** is an open-source geospatial software designed to leverage machine learning (ML) and artificial intelligence (AI) techniques for Earth science applications. This project provides tools for analyzing and processing geospatial data, making it accessible for research, environmental monitoring, and decision-making.  
 
 ## Features 🚀  

@@ -1,4 +1,0 @@
- 
-# maeson module
-
-::: maeson.maeson

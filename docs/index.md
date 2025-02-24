@@ -21,6 +21,7 @@ Before installing MAESon, ensure you have the following:
 
 ### 1. Install via PyPI
 To install the latest stable release of MAESon, run:
+
 ```bash
 pip install maeson
 ```

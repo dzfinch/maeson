@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation" class="md-skip">
+        <a href="#installation-guide-for-maeson" class="md-skip">
           Skip to content
         </a>
       
@@ -335,18 +335,78 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#stable-release" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      Stable release
+      Prerequisites 🛠
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#from-sources" class="md-nav__link">
+  <a href="#installation-instructions" class="md-nav__link">
     <span class="md-ellipsis">
-      From sources
+      Installation Instructions 💾
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation Instructions 💾">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-install-via-pypi" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Install via PyPI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Verify Installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-optional-install-additional-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Optional: Install Additional Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading-maeson" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrading MAESon 🔄
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstalling-maeson" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uninstalling MAESon ❌
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting ❓
     </span>
   </a>
   
@@ -644,18 +704,78 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#stable-release" class="md-nav__link">
+  <a href="#prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
-      Stable release
+      Prerequisites 🛠
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#from-sources" class="md-nav__link">
+  <a href="#installation-instructions" class="md-nav__link">
     <span class="md-ellipsis">
-      From sources
+      Installation Instructions 💾
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation Instructions 💾">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-install-via-pypi" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Install via PyPI
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-verify-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Verify Installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-optional-install-additional-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Optional: Install Additional Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upgrading-maeson" class="md-nav__link">
+    <span class="md-ellipsis">
+      Upgrading MAESon 🔄
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstalling-maeson" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uninstalling MAESon ❌
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting ❓
     </span>
   </a>
   
@@ -683,17 +803,46 @@
   
 
 
-<h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
-<h2 id="stable-release">Stable release<a class="headerlink" href="#stable-release" title="Permanent link">&para;</a></h2>
-<p>To install maeson, run this command in your terminal:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip install maeson
+<p>Here's an <code>installation.md</code> file for your documentation:</p>
+<h1 id="installation-guide-for-maeson">Installation Guide for MAESon 📦🚀<a class="headerlink" href="#installation-guide-for-maeson" title="Permanent link">&para;</a></h1>
+<p>MAESon is available on PyPI, making it easy to install and use. Follow the steps below to set up MAESon on your system.</p>
+<h2 id="prerequisites">Prerequisites 🛠<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p>Before installing MAESon, ensure you have the following:
+- <strong>Python 3.8+</strong> installed on your system
+- <strong>pip</strong> (Python package manager) updated to the latest version
+- Recommended: A virtual environment (e.g., <code>venv</code> or <code>conda</code>) for package management</p>
+<h2 id="installation-instructions">Installation Instructions 💾<a class="headerlink" href="#installation-instructions" title="Permanent link">&para;</a></h2>
+<h3 id="1-install-via-pypi">1. Install via PyPI<a class="headerlink" href="#1-install-via-pypi" title="Permanent link">&para;</a></h3>
+<p>To install the latest stable release of MAESon, run:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>maeson
+</code></pre></div></td></tr></table></div></p>
+<h3 id="2-verify-installation">2. Verify Installation<a class="headerlink" href="#2-verify-installation" title="Permanent link">&para;</a></h3>
+<p>To check if MAESon was installed successfully, run:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">maeson</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">maeson</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-<p>This is the preferred method to install maeson, as it will always install the most recent stable release.</p>
-<p>If you don't have <a href="https://pip.pypa.io">pip</a> installed, this <a href="http://docs.python-guide.org/en/latest/starting/installation/">Python installation guide</a> can guide you through the process.</p>
-<h2 id="from-sources">From sources<a class="headerlink" href="#from-sources" title="Permanent link">&para;</a></h2>
-<p>To install maeson from sources, run this command in your terminal:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip install git+https://github.com/dzfinch/maeson
+This should return the installed version of MAESon.</p>
+<h3 id="3-optional-install-additional-dependencies">3. Optional: Install Additional Dependencies<a class="headerlink" href="#3-optional-install-additional-dependencies" title="Permanent link">&para;</a></h3>
+<p>If you plan to use advanced features such as deep learning models or high-performance processing, install additional dependencies:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>maeson<span class="o">[</span>full<span class="o">]</span>
+</code></pre></div></td></tr></table></div></p>
+<h2 id="upgrading-maeson">Upgrading MAESon 🔄<a class="headerlink" href="#upgrading-maeson" title="Permanent link">&para;</a></h2>
+<p>To update MAESon to the latest version, use:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>maeson
+</code></pre></div></td></tr></table></div></p>
+<h2 id="uninstalling-maeson">Uninstalling MAESon ❌<a class="headerlink" href="#uninstalling-maeson" title="Permanent link">&para;</a></h2>
+<p>If you need to remove MAESon from your system, run:
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>uninstall<span class="w"> </span>maeson
+</code></pre></div></td></tr></table></div></p>
+<h2 id="troubleshooting">Troubleshooting ❓<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<p>If you encounter any issues:
+- Ensure <strong>pip</strong> and <strong>setuptools</strong> are up to date:
+  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip<span class="w"> </span>setuptools
 </code></pre></div></td></tr></table></div>
+- Check for missing dependencies and install them manually.
+- Report issues on <a href="https://github.com/yourusername/MAESon/issues">GitHub Issues</a>.</p>
+<p>🚀 <strong>You're now ready to use MAESon!</strong> Head over to the <a href="docs/user-guide.md">User Guide</a> to get started.</p>
 
 
 
@@ -716,7 +865,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-20T14:48:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-20</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-24T21:51:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-24</span>
   </span>
 
     

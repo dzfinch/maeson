@@ -1,21 +1,20 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "maeson"
 version = "0.0.1"
-dynamic = [
-    "dependencies",
-]
 description = "Geospatial software for raster and point cloud processing."
 readme = "README.md"
 requires-python = ">=3.8"
-keywords = [
-    "maeson",
-]
 license = {text = "MIT License"}
 authors = [
   {name = "Dryver Finch", email = "dryver2206@gmail.com"},
 ]
 classifiers = [
     "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",  # Added for geospatial focus
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3.8",
@@ -23,33 +22,57 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: GIS",  # Added for geospatial focus
+]
+keywords = ["geospatial", "raster", "point-cloud", "gis"]  # Expanded keywords
+
+# Define dependencies directly instead of dynamically
+dependencies = [
+    "geopandas>=0.12.0",  # Added for geospatial processing
+    "numpy>=1.23.0",      # Added for numerical operations
+    "shapely>=2.0.0",     # Added for geometry handling
+    "pandas>=1.5.0",      # Already in your extras
+    "matplotlib>=3.6.0",  # For plotting
 ]
 
 [project.entry-points."console_scripts"]
 maeson = "maeson.cli:main"
 
 [project.optional-dependencies]
+# Group optional dependencies logically
+extra = [
+    "scipy>=1.9.0",       # For advanced statistics
+    "rtree>=0.9.0",       # For spatial indexing
+]
+
+docs = [
+    "sphinx>=5.0.0",      # For documentation
+    "sphinx-rtd-theme>=1.0.0",  # For ReadTheDocs theme
+]
+
+test = [
+    "pytest>=7.0.0",      # For testing
+    "pytest-cov>=3.0.0",  # For test coverage
+    "black>=22.0.0",      # For code formatting
+    "flake8>=5.0.0",      # For linting
+]
+
+# Combine all optional dependencies
 all = [
     "maeson[extra]",
+    "maeson[docs]",
+    "maeson[test]",
 ]
 
-extra = [
-    "pandas",
-]
-
-
-[tool]
 [tool.setuptools.packages.find]
 include = ["maeson*"]
 exclude = ["docs*"]
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
-
+[tool.setuptools.package-data]  # Add this section
+maeson = ["notebooks/*.ipynb", "notebooks/data/*"]
 
 [tool.distutils.bdist_wheel]
 universal = true
-
 
 [tool.bumpversion]
 current_version = "0.0.1"
@@ -66,17 +89,13 @@ filename = "maeson/__init__.py"
 search = '__version__ = "{current_version}"'
 replace = '__version__ = "{new_version}"'
 
-
 [tool.flake8]
 exclude = [
     "docs",
 ]
 max-line-length = 88
 
-
 [project.urls]
 Homepage = "https://github.com/dzfinch/maeson"
-
-[build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
-build-backend = "setuptools.build_meta"
+Repository = "https://github.com/dzfinch/maeson"  # Added for completeness
+Issues = "https://github.com/dzfinch/maeson/issues"  # Added for issue tracking

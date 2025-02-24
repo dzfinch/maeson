@@ -7,51 +7,58 @@
 **Geospatial software for raster and point cloud processing.**
 
 
--   Free software: MIT License
--   Documentation: <https://dzfinch.github.io/maeson>
-    
+# Installation Guide for MAESon 📦🚀
 
-Sure! Here's the `homepage.md` in proper Markdown format:  
+MAESon is available on PyPI, making it easy to install and use. Follow the steps below to set up MAESon on your system.
 
-# Welcome to MAESon 🌍🤖  
+## Prerequisites 🛠
+Before installing MAESon, ensure you have the following:
+- **Python 3.8+** installed on your system
+- **pip** (Python package manager) updated to the latest version
+- Recommended: A virtual environment (e.g., `venv` or `conda`) for package management
 
-**MAESon (Machine Learning and Artificial Intelligence for Earth Science)** is an open-source geospatial software package that harnesses the power of AI and machine learning to analyze Earth science data. Whether you're working with remote sensing imagery, hydrological models, or ecological datasets, MAESon provides cutting-edge tools to extract meaningful insights.  
+## Installation Instructions 💾
 
-## Why MAESon? 🚀  
-- **AI-Powered Geospatial Analysis**: Integrates machine learning models for classification, prediction, and feature extraction.  
-- **Remote Sensing Support**: Works with multispectral, hyperspectral, and LiDAR data.  
-- **Hydrological & Ecological Tools**: Analyze land cover, water bodies, and vegetation changes.  
-- **Seamless GIS Integration**: Compatible with GDAL, QGIS, and other geospatial tools.  
-- **Open-Source & Community-Driven**: Built for researchers, by researchers.  
+### 1. Install via PyPI
+To install the latest stable release of MAESon, run:
 
-## Getting Started 💡  
-Ready to dive in? Follow these steps to set up MAESon on your machine:  
-
-### 1. Install MAESon  
 ```bash
 pip install maeson
 ```
 
-### 2. Load Your Data  
+### 2. Verify Installation
+To check if MAESon was installed successfully, run:
 ```python
 import maeson
-data = maeson.load_raster("path/to/your/data.tif")
+print(maeson.__version__)
+```
+This should return the installed version of MAESon.
+
+### 3. Optional: Install Additional Dependencies
+If you plan to use advanced features such as deep learning models or high-performance processing, install additional dependencies:
+```bash
+pip install maeson[full]
 ```
 
-### 3. Run Analysis  
-```python
-result = maeson.process_raster(data, model="random_forest")
+## Upgrading MAESon 🔄
+To update MAESon to the latest version, use:
+```bash
+pip install --upgrade maeson
 ```
 
-## Learn More 📚  
-- **[Installation Guide](docs/installation.md)** – Step-by-step setup instructions.  
-- **[User Guide](docs/user-guide.md)** – Explore core functionalities and examples.  
-- **[API Reference](docs/api.md)** – Detailed documentation on available methods.  
-- **[Contributing](docs/contributing.md)** – Join the MAESon development community!  
+## Uninstalling MAESon ❌
+If you need to remove MAESon from your system, run:
+```bash
+pip uninstall maeson
+```
 
-## Stay Connected 💬  
-- **GitHub**: [github.com/yourusername/MAESon](https://github.com/yourusername/MAESon)  
-- **Discussions & Issues**: Submit questions, feature requests, or bug reports.  
-- **Community Contributions**: Help improve MAESon by contributing code, documentation, or use cases.  
+## Troubleshooting ❓
+If you encounter any issues:
+- Ensure **pip** and **setuptools** are up to date:
+  ```bash
+  pip install --upgrade pip setuptools
+  ```
+- Check for missing dependencies and install them manually.
+- Report issues on [GitHub Issues](https://github.com/yourusername/MAESon/issues).
 
-🚀 **Get started today and bring AI-powered insights to your geospatial data!**  
+🚀 **You're now ready to use MAESon!** Head over to the [User Guide](docs/user-guide.md) to get started.

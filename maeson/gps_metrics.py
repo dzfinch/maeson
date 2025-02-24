@@ -10,11 +10,12 @@ import pandas as pd
 from shapely.geometry import Point
 from typing import Tuple, Optional
 
+
 def calculate_accuracy_metrics(
     gdf: gpd.GeoDataFrame,
     spot_id_col: str = "spot_id",
     crs: Optional[str] = None,
-    return_merged: bool = False
+    return_merged: bool = False,
 ) -> Tuple[gpd.GeoDataFrame, Optional[gpd.GeoDataFrame]]:
     """
     Calculate GPS accuracy metrics for grouped points according to ASPRS standards.
@@ -42,7 +43,7 @@ def calculate_accuracy_metrics(
     ValueError
         If input is not a GeoDataFrame or required columns are missing
     """
-    
+
     # Validate input
     if not isinstance(gdf, gpd.GeoDataFrame):
         raise ValueError("Input must be a GeoDataFrame")
@@ -58,68 +59,60 @@ def calculate_accuracy_metrics(
         avg_lon = working_gdf.geometry.x.mean()
         utm_zone = int((avg_lon + 180) // 6 + 1)
         crs = f"EPSG:326{utm_zone:02d}"  # Assumes northern hemisphere
-        
+
     working_gdf = working_gdf.to_crs(crs)
 
     # Add coordinate columns
-    working_gdf['x'] = working_gdf.geometry.x
-    working_gdf['y'] = working_gdf.geometry.y
+    working_gdf["x"] = working_gdf.geometry.x
+    working_gdf["y"] = working_gdf.geometry.y
 
     # Calculate mean points
     mean_points = (
-        working_gdf
-        .groupby(spot_id_col)
-        [['x', 'y']]
+        working_gdf.groupby(spot_id_col)[["x", "y"]]
         .mean()
         .reset_index()
-        .rename(columns={'x': 'x_mean', 'y': 'y_mean'})
+        .rename(columns={"x": "x_mean", "y": "y_mean"})
     )
 
     # Merge mean points with original data
-    merged = working_gdf.merge(
-        mean_points,
-        on=spot_id_col,
-        suffixes=('', '_mean')
-    )
+    merged = working_gdf.merge(mean_points, on=spot_id_col, suffixes=("", "_mean"))
 
     # Calculate distances
-    merged['distance'] = np.sqrt(
-        (merged['x'] - merged['x_mean'])**2 +
-        (merged['y'] - merged['y_mean'])**2
+    merged["distance"] = np.sqrt(
+        (merged["x"] - merged["x_mean"]) ** 2 + (merged["y"] - merged["y_mean"]) ** 2
     )
-    merged['squared_distance'] = merged['distance']**2
+    merged["squared_distance"] = merged["distance"] ** 2
 
     # Calculate metrics
     metrics = (
-        merged
-        .groupby(spot_id_col)
+        merged.groupby(spot_id_col)
         .agg(
-            n_points=pd.NamedAgg(column='distance', aggfunc='count'),
-            rmse=pd.NamedAgg(column='squared_distance', aggfunc=lambda x: np.sqrt(x.mean())),
-            std_dev=pd.NamedAgg(column='distance', aggfunc=lambda x: x.std(ddof=1)),
-            max_distance=pd.NamedAgg(column='distance', aggfunc='max')
+            n_points=pd.NamedAgg(column="distance", aggfunc="count"),
+            rmse=pd.NamedAgg(
+                column="squared_distance", aggfunc=lambda x: np.sqrt(x.mean())
+            ),
+            std_dev=pd.NamedAgg(column="distance", aggfunc=lambda x: x.std(ddof=1)),
+            max_distance=pd.NamedAgg(column="distance", aggfunc="max"),
         )
         .reset_index()
     )
 
     # Create metrics GeoDataFrame
     metrics_gdf = gpd.GeoDataFrame(
-        metrics.merge(
-            mean_points,
-            on=spot_id_col
-        ),
-        geometry=gpd.points_from_xy(mean_points['x_mean'], mean_points['y_mean']),
-        crs=crs
-    ).to_crs(original_crs)  # Return to original CRS
+        metrics.merge(mean_points, on=spot_id_col),
+        geometry=gpd.points_from_xy(mean_points["x_mean"], mean_points["y_mean"]),
+        crs=crs,
+    ).to_crs(
+        original_crs
+    )  # Return to original CRS
 
     # Rename columns to standard names
-    metrics_gdf = metrics_gdf.rename(columns={
-        'x_mean': 'mean_x',
-        'y_mean': 'mean_y'
-    })[[spot_id_col, 'n_points', 'rmse', 'std_dev', 'max_distance', 'geometry']]
+    metrics_gdf = metrics_gdf.rename(columns={"x_mean": "mean_x", "y_mean": "mean_y"})[
+        [spot_id_col, "n_points", "rmse", "std_dev", "max_distance", "geometry"]
+    ]
 
     if return_merged:
-        merged_gdf = merged.drop(['x', 'y'], axis=1).to_crs(original_crs)
+        merged_gdf = merged.drop(["x", "y"], axis=1).to_crs(original_crs)
         return metrics_gdf, merged_gdf
-    
+
     return metrics_gdf, None

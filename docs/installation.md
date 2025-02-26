@@ -1,5 +1,3 @@
-Here's an `installation.md` file for your documentation:
-
 # Installation Guide for MAESon 📦🚀
 
 MAESon is available on PyPI, making it easy to install and use. Follow the steps below to set up MAESon on your system.

@@ -609,45 +609,44 @@
 <h1 id="welcome-to-maeson">Welcome to maeson<a class="headerlink" href="#welcome-to-maeson" title="Permanent link">&para;</a></h1>
 <p><a href="https://pypi.python.org/pypi/maeson"><img alt="image" src="https://img.shields.io/pypi/v/maeson.svg" /></a></p>
 <p><strong>Geospatial software for raster and point cloud processing.</strong></p>
-<h1 id="installation-guide-for-maeson">Installation Guide for MAESon 📦🚀<a class="headerlink" href="#installation-guide-for-maeson" title="Permanent link">&para;</a></h1>
-<p>MAESon is available on PyPI, making it easy to install and use. Follow the steps below to set up MAESon on your system.</p>
-<h2 id="prerequisites">Prerequisites 🛠<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
-<p>Before installing MAESon, ensure you have the following:
-- <strong>Python 3.8+</strong> installed on your system
-- <strong>pip</strong> (Python package manager) updated to the latest version
-- Recommended: A virtual environment (e.g., <code>venv</code> or <code>conda</code>) for package management</p>
-<h2 id="installation-instructions">Installation Instructions 💾<a class="headerlink" href="#installation-instructions" title="Permanent link">&para;</a></h2>
-<h3 id="1-install-via-pypi">1. Install via PyPI<a class="headerlink" href="#1-install-via-pypi" title="Permanent link">&para;</a></h3>
-<p>To install the latest stable release of MAESon, run:</p>
+<p>Sure! Here's the <code>homepage.md</code> in proper Markdown format:  </p>
+<h1 id="welcome-to-maeson_1">Welcome to MAESon 🌍🤖<a class="headerlink" href="#welcome-to-maeson_1" title="Permanent link">&para;</a></h1>
+<p><strong>MAESon (Machine Learning and Artificial Intelligence for Earth Science)</strong> is an open-source geospatial software package that harnesses the power of AI and machine learning to analyze Earth science data. Whether you're working with remote sensing imagery, hydrological models, or ecological datasets, MAESon provides cutting-edge tools to extract meaningful insights.  </p>
+<h2 id="why-maeson">Why MAESon? 🚀<a class="headerlink" href="#why-maeson" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>AI-Powered Geospatial Analysis</strong>: Integrates machine learning models for classification, prediction, and feature extraction.  </li>
+<li><strong>Remote Sensing Support</strong>: Works with multispectral, hyperspectral, and LiDAR data.  </li>
+<li><strong>Hydrological &amp; Ecological Tools</strong>: Analyze land cover, water bodies, and vegetation changes.  </li>
+<li><strong>Seamless GIS Integration</strong>: Compatible with GDAL, QGIS, and other geospatial tools.  </li>
+<li><strong>Open-Source &amp; Community-Driven</strong>: Built for researchers, by researchers.  </li>
+</ul>
+<h2 id="getting-started">Getting Started 💡<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<p>Ready to dive in? Follow these steps to set up MAESon on your machine:  </p>
+<h3 id="1-install-maeson">1. Install MAESon<a class="headerlink" href="#1-install-maeson" title="Permanent link">&para;</a></h3>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>maeson
 </code></pre></div></td></tr></table></div>
-<h3 id="2-verify-installation">2. Verify Installation<a class="headerlink" href="#2-verify-installation" title="Permanent link">&para;</a></h3>
-<p>To check if MAESon was installed successfully, run:
+<h3 id="2-load-your-data">2. Load Your Data<a class="headerlink" href="#2-load-your-data" title="Permanent link">&para;</a></h3>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">maeson</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">maeson</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">maeson</span><span class="o">.</span><span class="n">load_raster</span><span class="p">(</span><span class="s2">&quot;path/to/your/data.tif&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-This should return the installed version of MAESon.</p>
-<h3 id="3-optional-install-additional-dependencies">3. Optional: Install Additional Dependencies<a class="headerlink" href="#3-optional-install-additional-dependencies" title="Permanent link">&para;</a></h3>
-<p>If you plan to use advanced features such as deep learning models or high-performance processing, install additional dependencies:
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>maeson<span class="o">[</span>full<span class="o">]</span>
-</code></pre></div></td></tr></table></div></p>
-<h2 id="upgrading-maeson">Upgrading MAESon 🔄<a class="headerlink" href="#upgrading-maeson" title="Permanent link">&para;</a></h2>
-<p>To update MAESon to the latest version, use:
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>maeson
-</code></pre></div></td></tr></table></div></p>
-<h2 id="uninstalling-maeson">Uninstalling MAESon ❌<a class="headerlink" href="#uninstalling-maeson" title="Permanent link">&para;</a></h2>
-<p>If you need to remove MAESon from your system, run:
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>uninstall<span class="w"> </span>maeson
-</code></pre></div></td></tr></table></div></p>
-<h2 id="troubleshooting">Troubleshooting ❓<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
-<p>If you encounter any issues:
-- Ensure <strong>pip</strong> and <strong>setuptools</strong> are up to date:
-  <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip<span class="w"> </span>setuptools
+<h3 id="3-run-analysis">3. Run Analysis<a class="headerlink" href="#3-run-analysis" title="Permanent link">&para;</a></h3>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">result</span> <span class="o">=</span> <span class="n">maeson</span><span class="o">.</span><span class="n">process_raster</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;random_forest&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
-- Check for missing dependencies and install them manually.
-- Report issues on <a href="https://github.com/yourusername/MAESon/issues">GitHub Issues</a>.</p>
-<p>🚀 <strong>You're now ready to use MAESon!</strong> Head over to the <a href="docs/user-guide.md">User Guide</a> to get started.</p>
+<h2 id="learn-more">Learn More 📚<a class="headerlink" href="#learn-more" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong><a href="docs/installation.md">Installation Guide</a></strong> – Step-by-step setup instructions.  </li>
+<li><strong><a href="docs/user-guide.md">User Guide</a></strong> – Explore core functionalities and examples.  </li>
+<li><strong><a href="docs/api.md">API Reference</a></strong> – Detailed documentation on available methods.  </li>
+<li><strong><a href="docs/contributing.md">Contributing</a></strong> – Join the MAESon development community!  </li>
+</ul>
+<h2 id="stay-connected">Stay Connected 💬<a class="headerlink" href="#stay-connected" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>GitHub</strong>: <a href="https://github.com/yourusername/MAESon">github.com/yourusername/MAESon</a>  </li>
+<li><strong>Discussions &amp; Issues</strong>: Submit questions, feature requests, or bug reports.  </li>
+<li><strong>Community Contributions</strong>: Help improve MAESon by contributing code, documentation, or use cases.  </li>
+</ul>
+<p>🚀 <strong>Get started today and bring AI-powered insights to your geospatial data!</strong>  </p>
 
 
 
@@ -670,7 +669,7 @@ This should return the installed version of MAESon.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-24T21:37:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-24</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2025-02-26T18:43:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2025-02-26</span>
   </span>
 
     

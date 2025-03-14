@@ -1,1 +1,9 @@
 numpy
+ipyleaflet
+pandas
+matplotlib
+scipy
+scikit-learn
+geopandas
+folium
+seaborn

@@ -1,6 +1,7 @@
 """Main module."""
 
 import ipyleaflet
+import folium
 
 
 class Map(ipyleaflet.Map):
@@ -35,22 +36,35 @@ class Map(ipyleaflet.Map):
         url = eval(f"ipyleaflet.basemaps.{basemap}").build_url()
         basemap_layer = ipyleaflet.TileLayer(url=url, name=basemap)
         self.add(basemap_layer)
+
         
-    def add_layer(self, layer) -> None:
+    def layer(self, layer) -> None:
         """
         Args:
-            layer (ipyleaflet.Layer): Layer to be added to the map.
+            layer (str or dict): Layer to be added to the map.
             **kwargs: Additional arguments for the layer.
         Returns:
             None
         Raises:
-            ValueError: If the layer is not an instance of ipyleaflet.Layer.
-        """ 
-        """Add a layer to the map."""
-        if isinstance(layer, ipyleaflet.Layer):
-            self.add(layer)
-        else:
+            ValueError: If the layer is not a valid type.
+        """
+        """ Convert url to layer"""
+        if isinstance(layer, str):
+            layer = ipyleaflet.TileLayer(url=layer)
+        elif isinstance(layer, dict):
+            layer = ipyleaflet.GeoJSON(data=layer)
+        elif not isinstance(layer, ipyleaflet.Layer):
             raise ValueError("Layer must be an instance of ipyleaflet.Layer")
+        return layer
+        
+    def add_layer_control(self, position="topright") -> None:
+        """Adds a layer control to the map.
+
+        Args:
+            position (str, optional): The position of the layer control. Defaults to 'topright'.
+        """
+
+        self.add(ipyleaflet.LayersControl(position=position))    
         
     def add_raster(self, filepath, **kwargs):
         """Add a raster layer to the map."""
@@ -113,22 +127,122 @@ class Map(ipyleaflet.Map):
             raise ValueError("Bounds must be a list of coordinates.")
         self.fit_bounds(bounds)
         
-    def add_wms(self, url, layers, format=format, transparent=transparent, **kwargs):
+    def add_wms(self, url, layers, **kwargs):
         """
         Args:
-            url (str): URL to the WMS server.
-            layers (str): Comma-separated list of layer names.
+            url (str): URL to the WMS service.
+            layers (str): Comma-separated list of layers to be added.
             **kwargs: Additional arguments for the WMS layer.
         """
         """Add a WMS layer to the map."""
-        if not url.startswith("http"):
-            raise ValueError("URL must start with http or https.")
-        if not layers:
-            raise ValueError("Layers must be a comma-separated string.")
-        if not format:
-            format = "image/png"
-        if not transparent:
-            transparent = True
         wms_layer = ipyleaflet.WMSLayer(url=url, layers=layers, **kwargs)
         self.add(wms_layer)
+        
+    def add_vector(self, vector, **kwargs):
+        """
+        Args:
+            vector (dict): Vector data.
+            **kwargs: Additional arguments for the GeoJSON layer.
+        """
+        """Add a vector layer to the map from Geopandas."""
+        vector_layer = ipyleaflet.GeoJSON(data=vector, **kwargs)
+        self.add(vector_layer)
+        
+class FMap(folium.Map):
+    def __init__(self, center=[20, 0], zoom=2, **kwargs):
+        super(Map, self).__init__(location=center, zoom_start=zoom, **kwargs)
+        
+    def add_basemap(self, basemap="Esri.WorldImagery"):
+        """
+        Args:
+            basemap (str): Basemap name. Default is "Esri.WorldImagery".
+        """
+        """Add a basemap to the map."""
+        basemaps = [
+            "OpenStreetMap.Mapnik",
+            "Stamen.Terrain",
+            "Stamen.TerrainBackground",
+            "Stamen.Watercolor",
+            "Esri.WorldImagery",
+            "Esri.DeLorme",
+            "Esri.NatGeoWorldMap",
+            "Esri.WorldStreetMap",
+            "Esri.WorldTopoMap",
+            "Esri.WorldGrayCanvas",
+            "Esri.WorldShadedRelief",
+            "Esri.WorldPhysical",
+            "Esri.WorldTerrain",
+            "Google.Satellite",
+            "Google.Street",
+            "Google.Hybrid",
+            "Google.Terrain",
+        ]
+        url = eval(f"folium.basemaps.{basemap}").build_url()
+        folium.TileLayer(url=url, name=basemap).add_to(self)
 
+    def add_layer(self, layer) -> None:
+        """
+        Args:
+            layer (folium.Layer): Layer to be added to the map.
+            **kwargs: Additional arguments for the layer.
+        Returns:
+            None
+        Raises:
+            ValueError: If the layer is not an instance of folium.Layer.
+        """ 
+        """Add a layer to the map."""
+        if isinstance(layer, folium.Layer):
+            layer.add_to(self)
+        else:
+            raise ValueError("Layer must be an instance of folium.Layer")
+        
+    def add_control(self, control) -> None:
+        """
+        Args:
+            control (folium.Control): Control to be added to the map.
+            **kwargs: Additional arguments for the control.
+        Returns:
+            None
+        Raises:
+            ValueError: If the control is not an instance of folium.Control.
+        """ 
+        """Add a control to the map."""
+        if isinstance(control, folium.Control):
+            control.add_to(self)
+        else:
+            raise ValueError("Control must be an instance of folium.Control")
+        
+    def add_raster(self, filepath, **kwargs):
+        """
+        Args:
+            filepath (str): URL to the raster file.
+            **kwargs: Additional arguments for the ImageOverlay.
+        """
+        """Add a raster layer to the map."""
+        raster_layer = folium.raster_layers.ImageOverlay(url=filepath, **kwargs)
+        raster_layer.add_to(self)
+        
+    def add_image(self, image, bounds=None, **kwargs):
+        """
+        Args:
+            image (str): URL to the image file.
+            bounds (list): List of coordinates for the bounds of the image.
+            **kwargs: Additional arguments for the ImageOverlay.
+        1. [[lat1, lon1], [lat2, lon2]] for a rectangular area.
+        2. [[lat, lon]] for a single point.
+        """
+        """Add an image to the map."""
+        if bounds is None:
+            bounds = [[-30, -60], [30, 60]]
+        image_layer = folium.raster_layers.ImageOverlay(url=image, bounds=bounds, **kwargs)
+        image_layer.add_to(self)
+        
+    def add_vector(self, vector, **kwargs):
+        """
+        Args:
+            vector (dict): Vector data.
+            **kwargs: Additional arguments for the GeoJSON layer.
+        """
+        """Add a vector layer to the map."""
+        vector_layer = folium.GeoJson(data=vector, **kwargs)
+        vector_layer.add_to(self)

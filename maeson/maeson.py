@@ -37,7 +37,6 @@ class Map(ipyleaflet.Map):
         basemap_layer = ipyleaflet.TileLayer(url=url, name=basemap)
         self.add(basemap_layer)
 
-        
     def layer(self, layer) -> None:
         """
         Args:
@@ -56,7 +55,7 @@ class Map(ipyleaflet.Map):
         elif not isinstance(layer, ipyleaflet.Layer):
             raise ValueError("Layer must be an instance of ipyleaflet.Layer")
         return layer
-        
+
     def add_layer_control(self, position="topright") -> None:
         """Adds a layer control to the map.
 
@@ -64,13 +63,13 @@ class Map(ipyleaflet.Map):
             position (str, optional): The position of the layer control. Defaults to 'topright'.
         """
 
-        self.add(ipyleaflet.LayersControl(position=position))    
-        
+        self.add(ipyleaflet.LayersControl(position=position))
+
     def add_raster(self, filepath, **kwargs):
         """Add a raster layer to the map."""
         raster_layer = ipyleaflet.ImageOverlay(url=filepath, **kwargs)
         self.add(raster_layer)
-        
+
     def add_image(self, image, bounds=None, **kwargs):
         """
         Args:
@@ -83,7 +82,7 @@ class Map(ipyleaflet.Map):
             bounds = [[-90, -180], [90, 180]]
         image_layer = ipyleaflet.ImageOverlay(url=image, bounds=bounds, **kwargs)
         self.add(image_layer)
-        
+
     def add_geojson(self, geojson, **kwargs):
         """
         Args:
@@ -93,20 +92,20 @@ class Map(ipyleaflet.Map):
         """Add a GeoJSON layer to the map."""
         geojson_layer = ipyleaflet.GeoJSON(data=geojson, **kwargs)
         self.add(geojson_layer)
-        
+
     def add_video(self, video, bounds=None, **kwargs):
         """
         Args:
             video (str): URL to the video file.
             bounds (list): List of coordinates for the bounds of the video.
             **kwargs: Additional arguments for the VideoOverlay.
-        """        
+        """
         """Add a video layer to the map."""
         if bounds is None:
             bounds = [[-90, -180], [90, 180]]
         video_layer = ipyleaflet.VideoOverlay(url=video, bounds=bounds, **kwargs)
         self.add(video_layer)
-    
+
     def zoom_to(self, bounds):
         """
         Args:
@@ -117,16 +116,20 @@ class Map(ipyleaflet.Map):
         """Zoom to the given bounds."""
         if len(bounds) == 1:
             # Single point
-            bounds = [[bounds[0][0] - 0.01, bounds[0][1] - 0.01],
-                      [bounds[0][0] + 0.01, bounds[0][1] + 0.01]]
+            bounds = [
+                [bounds[0][0] - 0.01, bounds[0][1] - 0.01],
+                [bounds[0][0] + 0.01, bounds[0][1] + 0.01],
+            ]
         elif len(bounds) == 2:
             # Rectangular area
-            bounds = [[bounds[0][0] - 0.01, bounds[0][1] - 0.01],
-                      [bounds[1][0] + 0.01, bounds[1][1] + 0.01]]
+            bounds = [
+                [bounds[0][0] - 0.01, bounds[0][1] - 0.01],
+                [bounds[1][0] + 0.01, bounds[1][1] + 0.01],
+            ]
         else:
             raise ValueError("Bounds must be a list of coordinates.")
         self.fit_bounds(bounds)
-        
+
     def add_wms(self, url, layers, **kwargs):
         """
         Args:
@@ -137,7 +140,7 @@ class Map(ipyleaflet.Map):
         """Add a WMS layer to the map."""
         wms_layer = ipyleaflet.WMSLayer(url=url, layers=layers, **kwargs)
         self.add(wms_layer)
-        
+
     def add_vector(self, vector, **kwargs):
         """
         Args:
@@ -147,11 +150,12 @@ class Map(ipyleaflet.Map):
         """Add a vector layer to the map from Geopandas."""
         vector_layer = ipyleaflet.GeoJSON(data=vector, **kwargs)
         self.add(vector_layer)
-        
+
+
 class FMap(folium.Map):
     def __init__(self, center=[20, 0], zoom=2, **kwargs):
         super(Map, self).__init__(location=center, zoom_start=zoom, **kwargs)
-        
+
     def add_basemap(self, basemap="Esri.WorldImagery"):
         """
         Args:
@@ -189,13 +193,13 @@ class FMap(folium.Map):
             None
         Raises:
             ValueError: If the layer is not an instance of folium.Layer.
-        """ 
+        """
         """Add a layer to the map."""
         if isinstance(layer, folium.Layer):
             layer.add_to(self)
         else:
             raise ValueError("Layer must be an instance of folium.Layer")
-        
+
     def add_control(self, control) -> None:
         """
         Args:
@@ -205,13 +209,13 @@ class FMap(folium.Map):
             None
         Raises:
             ValueError: If the control is not an instance of folium.Control.
-        """ 
+        """
         """Add a control to the map."""
         if isinstance(control, folium.Control):
             control.add_to(self)
         else:
             raise ValueError("Control must be an instance of folium.Control")
-        
+
     def add_raster(self, filepath, **kwargs):
         """
         Args:
@@ -221,7 +225,7 @@ class FMap(folium.Map):
         """Add a raster layer to the map."""
         raster_layer = folium.raster_layers.ImageOverlay(url=filepath, **kwargs)
         raster_layer.add_to(self)
-        
+
     def add_image(self, image, bounds=None, **kwargs):
         """
         Args:
@@ -234,9 +238,11 @@ class FMap(folium.Map):
         """Add an image to the map."""
         if bounds is None:
             bounds = [[-30, -60], [30, 60]]
-        image_layer = folium.raster_layers.ImageOverlay(url=image, bounds=bounds, **kwargs)
+        image_layer = folium.raster_layers.ImageOverlay(
+            url=image, bounds=bounds, **kwargs
+        )
         image_layer.add_to(self)
-        
+
     def add_vector(self, vector, **kwargs):
         """
         Args:

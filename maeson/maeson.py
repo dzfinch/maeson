@@ -106,29 +106,32 @@ class Map(ipyleaflet.Map):
         video_layer = ipyleaflet.VideoOverlay(url=video, bounds=bounds, **kwargs)
         self.add(video_layer)
 
-    def zoom_to(self, bounds):
+    def set_center(self, lat, lon, zoom=6, **kwargs):
         """
         Args:
-            bounds (list): List of coordinates for the bounds to zoom to.
-        1. [[lat1, lon1], [lat2, lon2]] for a rectangular area.
-        2. [[lat, lon]] for a single point.
+            lat (float): Latitude of the center.
+            lon (float): Longitude of the center.
+            zoom (int): Zoom level.
+            **kwargs: Additional arguments for the map.
         """
-        """Zoom to the given bounds."""
-        if len(bounds) == 1:
-            # Single point
-            bounds = [
-                [bounds[0][0] - 0.01, bounds[0][1] - 0.01],
-                [bounds[0][0] + 0.01, bounds[0][1] + 0.01],
-            ]
-        elif len(bounds) == 2:
-            # Rectangular area
-            bounds = [
-                [bounds[0][0] - 0.01, bounds[0][1] - 0.01],
-                [bounds[1][0] + 0.01, bounds[1][1] + 0.01],
-            ]
-        else:
-            raise ValueError("Bounds must be a list of coordinates.")
-        self.fit_bounds(bounds)
+        """Set the center of the map."""
+        self.center = (lat, lon)
+        self.zoom = zoom
+
+    def center_object(self, obj, zoom=6, **kwargs):
+        """
+        Args:
+            obj (str or dict): Object to center the map on.
+            zoom (int): Zoom level.
+            **kwargs: Additional arguments for the map.
+        """
+        """Center the map on an object."""
+        if isinstance(obj, str):
+            obj = ipyleaflet.GeoJSON(data=obj, **kwargs)
+        elif not isinstance(obj, ipyleaflet.Layer):
+            raise ValueError("Object must be an instance of ipyleaflet.Layer")
+        self.center = (obj.location[0], obj.location[1])
+        self.zoom = zoom
 
     def add_wms(self, url, layers, **kwargs):
         """
@@ -150,105 +153,3 @@ class Map(ipyleaflet.Map):
         """Add a vector layer to the map from Geopandas."""
         vector_layer = ipyleaflet.GeoJSON(data=vector, **kwargs)
         self.add(vector_layer)
-
-
-class FMap(folium.Map):
-    def __init__(self, center=[20, 0], zoom=2, **kwargs):
-        super(Map, self).__init__(location=center, zoom_start=zoom, **kwargs)
-
-    def add_basemap(self, basemap="Esri.WorldImagery"):
-        """
-        Args:
-            basemap (str): Basemap name. Default is "Esri.WorldImagery".
-        """
-        """Add a basemap to the map."""
-        basemaps = [
-            "OpenStreetMap.Mapnik",
-            "Stamen.Terrain",
-            "Stamen.TerrainBackground",
-            "Stamen.Watercolor",
-            "Esri.WorldImagery",
-            "Esri.DeLorme",
-            "Esri.NatGeoWorldMap",
-            "Esri.WorldStreetMap",
-            "Esri.WorldTopoMap",
-            "Esri.WorldGrayCanvas",
-            "Esri.WorldShadedRelief",
-            "Esri.WorldPhysical",
-            "Esri.WorldTerrain",
-            "Google.Satellite",
-            "Google.Street",
-            "Google.Hybrid",
-            "Google.Terrain",
-        ]
-        url = eval(f"folium.basemaps.{basemap}").build_url()
-        folium.TileLayer(url=url, name=basemap).add_to(self)
-
-    def add_layer(self, layer) -> None:
-        """
-        Args:
-            layer (folium.Layer): Layer to be added to the map.
-            **kwargs: Additional arguments for the layer.
-        Returns:
-            None
-        Raises:
-            ValueError: If the layer is not an instance of folium.Layer.
-        """
-        """Add a layer to the map."""
-        if isinstance(layer, folium.Layer):
-            layer.add_to(self)
-        else:
-            raise ValueError("Layer must be an instance of folium.Layer")
-
-    def add_control(self, control) -> None:
-        """
-        Args:
-            control (folium.Control): Control to be added to the map.
-            **kwargs: Additional arguments for the control.
-        Returns:
-            None
-        Raises:
-            ValueError: If the control is not an instance of folium.Control.
-        """
-        """Add a control to the map."""
-        if isinstance(control, folium.Control):
-            control.add_to(self)
-        else:
-            raise ValueError("Control must be an instance of folium.Control")
-
-    def add_raster(self, filepath, **kwargs):
-        """
-        Args:
-            filepath (str): URL to the raster file.
-            **kwargs: Additional arguments for the ImageOverlay.
-        """
-        """Add a raster layer to the map."""
-        raster_layer = folium.raster_layers.ImageOverlay(url=filepath, **kwargs)
-        raster_layer.add_to(self)
-
-    def add_image(self, image, bounds=None, **kwargs):
-        """
-        Args:
-            image (str): URL to the image file.
-            bounds (list): List of coordinates for the bounds of the image.
-            **kwargs: Additional arguments for the ImageOverlay.
-        1. [[lat1, lon1], [lat2, lon2]] for a rectangular area.
-        2. [[lat, lon]] for a single point.
-        """
-        """Add an image to the map."""
-        if bounds is None:
-            bounds = [[-30, -60], [30, 60]]
-        image_layer = folium.raster_layers.ImageOverlay(
-            url=image, bounds=bounds, **kwargs
-        )
-        image_layer.add_to(self)
-
-    def add_vector(self, vector, **kwargs):
-        """
-        Args:
-            vector (dict): Vector data.
-            **kwargs: Additional arguments for the GeoJSON layer.
-        """
-        """Add a vector layer to the map."""
-        vector_layer = folium.GeoJson(data=vector, **kwargs)
-        vector_layer.add_to(self)

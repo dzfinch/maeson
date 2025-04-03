@@ -1,4 +1,4 @@
-""" Folium Module """
+"""Folium Module"""
 
 import os
 import folium
@@ -13,13 +13,14 @@ from jinja2 import Template
 import pandas as pd
 from typing import Optional, Union, Any, Callable, Dict, Tuple, List
 
+
 class Map(folium.Map):
     """
     class that extends folium.Map.
     This class is used to create a map with additional functionalities.
     """
 
-    def __init__(self, center=(0,0), zoom=2, **kwargs):
+    def __init__(self, center=(0, 0), zoom=2, **kwargs):
         super().__init__(location=center, zoom_start=zoom, **kwargs)
 
     def add_basemap(self, name: str, **kwargs):
@@ -39,11 +40,11 @@ class Map(folium.Map):
             folium.TileLayer(
                 tiles=basemaps[name],
                 attr='&copy; <a href="http://www.esri.com/">Esri</a>',
-                **kwargs
+                **kwargs,
             ).add_to(self)
         else:
             raise ValueError(f"Basemap '{name}' not found.")
-        
+
     def add_geojson(self, data, name="GeoJSON Layer", **kwargs):
         """Adds a GeoJSON layer to the map.
 
@@ -114,7 +115,7 @@ class Map(folium.Map):
     def add_layer_control(self):
         """Adds a layer control widget to the map."""
         folium.LayerControl().add_to(self)
-        
+
     def add_raster(self, data: str, layer_name: str, **kwargs):
         """
         Add a raster layer to the map.

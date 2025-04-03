@@ -117,7 +117,7 @@ class Map(ipyleaflet.Map):
         """Set the center of the map."""
         self.center = (lat, lon)
         self.zoom = zoom
-        
+
     def center_object(self, obj, zoom=6, **kwargs):
         """
         Args:

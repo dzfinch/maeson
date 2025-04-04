@@ -3,7 +3,6 @@
 import folium
 
 
-
 class Map(folium.Map):
     """
     class that extends folium.Map.

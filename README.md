@@ -6,7 +6,6 @@
 - 🛰 **Remote Sensing Data Processing**: Support for multispectral and LiDAR datasets.
 - 🌊 **Hydrological & Ecological Analysis**: Tools for analyzing water bodies, vegetation, and land cover.
 - 🏗 **Geospatial Machine Learning**: Built-in models for classification, segmentation, and prediction.
-- 📡 **Integration with GIS Tools**: Compatible with QGIS, GDAL, and other geospatial libraries.
 - 📊 **Data Visualization**: Interactive mapping and statistical insights.
 
 ## Installation 💾

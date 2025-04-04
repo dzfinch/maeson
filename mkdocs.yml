@@ -80,7 +80,7 @@ nav:
     - Changelog: changelog.md
     - Report Issues: https://github.com/dzfinch/maeson/issues
     - Examples:
-        - examples/intro.ipynb
+        - examples/usage.ipynb
     - API Reference:
           - maeson module: maeson.md
           - common module: common.md

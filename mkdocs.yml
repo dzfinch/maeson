@@ -81,6 +81,8 @@ nav:
     - Report Issues: https://github.com/dzfinch/maeson/issues
     - Examples:
         - examples/usage.ipynb
+        - examples/midterm.ipynb
     - API Reference:
           - maeson module: maeson.md
+          - folmap module: folmap.md
           - common module: common.md

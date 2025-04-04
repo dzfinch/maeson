@@ -1,6 +1,7 @@
 """Folium Module"""
 
 import folium
+from folium import plugins
 
 
 class Map(folium.Map):
@@ -114,3 +115,22 @@ class Map(folium.Map):
             **kwargs: Additional arguments to pass to the folium.ImageOverlay.
         """
         folium.ImageOverlay(data, name=layer_name, **kwargs).add_to(self)
+
+    def add_split_map(self, left="openstreetmap", right="cartodbpositron", **kwargs):
+
+        layer_right = folium.TileLayer(left, **kwargs)
+        layer_left = folium.TileLayer(right, **kwargs)
+
+        sbs = folium.plugins.SideBySideLayers(
+            layer_left=layer_left, layer_right=layer_right
+        )
+
+        # Allow for raster TIFs to be added to left or right
+        if isinstance(left, str) and left.endswith(".tif"):
+            layer_left = folium.ImageOverlay(left, **kwargs)
+        if isinstance(right, str) and right.endswith(".tif"):
+            layer_right = folium.ImageOverlay(right, **kwargs)
+
+        layer_left.add_to(self)
+        layer_right.add_to(self)
+        sbs.add_to(self)

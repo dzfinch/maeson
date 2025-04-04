@@ -124,7 +124,7 @@ class Map(folium.Map):
         sbs = folium.plugins.SideBySideLayers(
             layer_left=layer_left, layer_right=layer_right
         )
-        
+
         # Allow for raster TIFs to be added to left or right
         if isinstance(left, str) and left.endswith(".tif"):
             layer_left = folium.ImageOverlay(left, **kwargs)

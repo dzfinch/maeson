@@ -1,17 +1,7 @@
 """Folium Module"""
 
-import os
 import folium
-import folium.plugins as plugins
-from box import Box
 
-from branca.element import Figure, JavascriptLink, MacroElement
-from folium.elements import JSCSSMixin
-from folium.map import Layer
-from jinja2 import Template
-
-import pandas as pd
-from typing import Optional, Union, Any, Callable, Dict, Tuple, List
 
 
 class Map(folium.Map):

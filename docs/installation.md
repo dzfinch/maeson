@@ -4,7 +4,7 @@ MAESon is available on PyPI, making it easy to install and use. Follow the steps
 
 ## Prerequisites 🛠
 Before installing MAESon, ensure you have the following:
-- **Python 3.8+** installed on your system
+- **Python 3.8+** installed on your system.
 - **pip** (Python package manager) updated to the latest version
 - Recommended: A virtual environment (e.g., `venv` or `conda`) for package management
 

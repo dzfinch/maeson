@@ -153,3 +153,4 @@ class Map(ipyleaflet.Map):
         """Add a vector layer to the map from Geopandas."""
         vector_layer = ipyleaflet.GeoJSON(data=vector, **kwargs)
         self.add(vector_layer)
+

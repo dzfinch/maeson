@@ -3,6 +3,8 @@
 import ipyleaflet
 import folium
 import rasterio
+import localtileserver
+from localtileserver import TileClient, get_leaflet_tile_layer
 from ipyleaflet import WMSLayer, VideoOverlay, TileLayer, LocalTileLayer
 
 

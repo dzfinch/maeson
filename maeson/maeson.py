@@ -3,7 +3,7 @@
 import ipyleaflet
 import folium
 import rasterio
-from ipyleaflet import WMSLayer, VideoOverlay
+from ipyleaflet import WMSLayer, VideoOverlay, TileLayer, LocalTileLayer
 
 
 class Map(ipyleaflet.Map):

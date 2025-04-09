@@ -169,14 +169,10 @@ class Map(ipyleaflet.Map):
 
         # Create the tile client from the provided file path.
         client = TileClient(filepath)
-        
+
         # Generate the leaflet tile layer using the provided parameters.
         tile_layer = get_leaflet_tile_layer(
-            client,
-            name=name,
-            colormap=colormap,
-            opacity=opacity,
-            **kwargs
+            client, name=name, colormap=colormap, opacity=opacity, **kwargs
         )
 
         # Add the layer to the viewer and update the center and zoom based on the raster metadata.
@@ -197,18 +193,28 @@ class Map(ipyleaflet.Map):
         Raises:
             ValueError: If bounds is not provided or is improperly formatted.
         """
-        
+
         # Validate bounds: It should be a tuple of two coordinate tuples, each of length 2.
-        if not (isinstance(bounds, tuple) and len(bounds) == 2 and 
-                all(isinstance(coord, tuple) and len(coord) == 2 for coord in bounds)):
-            raise ValueError("bounds must be a tuple in the format ((south, west), (north, east))")
+        if not (
+            isinstance(bounds, tuple)
+            and len(bounds) == 2
+            and all(isinstance(coord, tuple) and len(coord) == 2 for coord in bounds)
+        ):
+            raise ValueError(
+                "bounds must be a tuple in the format ((south, west), (north, east))"
+            )
 
         # Create the image overlay using ipyleaflet.ImageOverlay.
-        overlay = ipyleaflet.ImageOverlay(url=url, bounds=bounds, opacity=opacity, **kwargs)
-        
+        overlay = ipyleaflet.ImageOverlay(
+            url=url, bounds=bounds, opacity=opacity, **kwargs
+        )
+
         # Add the overlay to the map.
         self.add(overlay)
-        self.center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2]
+        self.center = [
+            (bounds[0][0] + bounds[1][0]) / 2,
+            (bounds[0][1] + bounds[1][1]) / 2,
+        ]
 
     def add_video(self, url, bounds, opacity=1.0, **kwargs):
         """
@@ -222,9 +228,16 @@ class Map(ipyleaflet.Map):
         """
 
         # Validate and normalize bounds format
-        if not (isinstance(bounds, (tuple, list)) and len(bounds) == 2 and 
-                all(isinstance(coord, (tuple, list)) and len(coord) == 2 for coord in bounds)):
-            raise ValueError("bounds must be provided as ((south, west), (north, east))")
+        if not (
+            isinstance(bounds, (tuple, list))
+            and len(bounds) == 2
+            and all(
+                isinstance(coord, (tuple, list)) and len(coord) == 2 for coord in bounds
+            )
+        ):
+            raise ValueError(
+                "bounds must be provided as ((south, west), (north, east))"
+            )
 
         # Convert bounds to tuple of tuples
         bounds = tuple(tuple(coord) for coord in bounds)
@@ -258,7 +271,7 @@ class Map(ipyleaflet.Map):
             name=name,
             format=format,
             transparent=transparent,
-            **kwargs
+            **kwargs,
         )
 
         # Add the WMS layer to the map.

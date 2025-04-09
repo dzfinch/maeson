@@ -461,12 +461,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../examples/usage/" class="md-nav__link">
+      <a href="../examples/usage.ipynb" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    Usage
+    None
     
   </span>
   
@@ -686,9 +686,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#maeson.maeson.Map.add_wms" class="md-nav__link">
+  <a href="#maeson.maeson.Map.add_wms_layer" class="md-nav__link">
     <span class="md-ellipsis">
-      add_wms()
+      add_wms_layer()
     </span>
   </a>
   
@@ -897,9 +897,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#maeson.maeson.Map.add_wms" class="md-nav__link">
+  <a href="#maeson.maeson.Map.add_wms_layer" class="md-nav__link">
     <span class="md-ellipsis">
-      add_wms()
+      add_wms_layer()
     </span>
   </a>
   
@@ -1126,17 +1126,6 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
         <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">location</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">obj</span><span class="o">.</span><span class="n">location</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="n">zoom</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_wms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
-<span class="sd">            url (str): URL to the WMS service.</span>
-<span class="sd">            layers (str): Comma-separated list of layers to be added.</span>
-<span class="sd">            **kwargs: Additional arguments for the WMS layer.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a WMS layer to the map.&quot;&quot;&quot;</span>
-        <span class="n">wms_layer</span> <span class="o">=</span> <span class="n">ipyleaflet</span><span class="o">.</span><span class="n">WMSLayer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wms_layer</span><span class="p">)</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">add_vector</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
@@ -1146,6 +1135,140 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a vector layer to the map from Geopandas.&quot;&quot;&quot;</span>
         <span class="n">vector_layer</span> <span class="o">=</span> <span class="n">ipyleaflet</span><span class="o">.</span><span class="n">GeoJSON</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">vector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vector_layer</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_raster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;greys&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a raster (COG) layer to the map.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        filepath (str): Path or URL to the cloud-optimized GeoTIFF (COG).</span>
+<span class="sd">        name (str, optional): Display name for the layer.</span>
+<span class="sd">        colormap (dict or str, optional): A colormap dictionary or a string identifier.</span>
+<span class="sd">        opacity (float, optional): Transparency level (default is 1 for fully opaque).</span>
+<span class="sd">        **kwargs: Additional keyword arguments to pass to the tile layer generator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">localtileserver</span><span class="w"> </span><span class="kn">import</span> <span class="n">TileClient</span><span class="p">,</span> <span class="n">get_leaflet_tile_layer</span>
+
+        <span class="c1"># Open the raster with rasterio to inspect metadata.</span>
+        <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+            <span class="c1"># If no colormap is provided (i.e., None), try extracting it from the raster&#39;s first band.</span>
+            <span class="k">if</span> <span class="n">colormap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">colormap</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">colormap</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="c1"># Leave colormap unchanged if extraction fails.</span>
+                    <span class="n">colormap</span> <span class="o">=</span> <span class="s2">&quot;greys&quot;</span>
+
+        <span class="c1"># Create the tile client from the provided file path.</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">TileClient</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+        <span class="c1"># Generate the leaflet tile layer using the provided parameters.</span>
+        <span class="n">tile_layer</span> <span class="o">=</span> <span class="n">get_leaflet_tile_layer</span><span class="p">(</span>
+            <span class="n">client</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="n">colormap</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Add the layer to the viewer and update the center and zoom based on the raster metadata.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tile_layer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">default_zoom</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds an image or animated GIF overlay to the map.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            url (str): The URL of the image or GIF.</span>
+<span class="sd">            bounds (tuple): Geographic coordinates as ((south, west), (north, east)).</span>
+<span class="sd">            opacity (float, optional): The transparency level of the overlay (default is 1, fully opaque).</span>
+<span class="sd">            **kwargs: Additional keyword arguments for ipyleaflet.ImageOverlay.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If bounds is not provided or is improperly formatted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Validate bounds: It should be a tuple of two coordinate tuples, each of length 2.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+            <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;bounds must be a tuple in the format ((south, west), (north, east))&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Create the image overlay using ipyleaflet.ImageOverlay.</span>
+        <span class="n">overlay</span> <span class="o">=</span> <span class="n">ipyleaflet</span><span class="o">.</span><span class="n">ImageOverlay</span><span class="p">(</span>
+            <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Add the overlay to the map.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">overlay</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_video</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a video overlay to the map using ipyleaflet.VideoOverlay.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            url (str or list): The URL or list of URLs for the video file(s).</span>
+<span class="sd">            bounds (tuple): Geographic bounds in the format ((south, west), (north, east)).</span>
+<span class="sd">            opacity (float): Transparency level of the overlay (0 = fully transparent, 1 = fully opaque).</span>
+<span class="sd">            **kwargs: Additional keyword arguments for ipyleaflet.VideoOverlay.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Validate and normalize bounds format</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+            <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">bounds</span>
+            <span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;bounds must be provided as ((south, west), (north, east))&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Convert bounds to tuple of tuples</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">)</span>
+
+        <span class="c1"># Create and add the VideoOverlay</span>
+        <span class="n">overlay</span> <span class="o">=</span> <span class="n">VideoOverlay</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">overlay</span><span class="p">)</span>
+
+        <span class="c1"># Center the map on the video bounds</span>
+        <span class="n">south</span><span class="p">,</span> <span class="n">west</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">north</span><span class="p">,</span> <span class="n">east</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="p">[(</span><span class="n">south</span> <span class="o">+</span> <span class="n">north</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">west</span> <span class="o">+</span> <span class="n">east</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_wms_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">transparent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a WMS (Web Map Service) layer to the map using ipyleaflet.WMSLayer.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            url (str): Base WMS endpoint.</span>
+<span class="sd">            layers (str): Comma-separated layer names.</span>
+<span class="sd">            name (str): Display name for the layer.</span>
+<span class="sd">            format (str): Image format (e.g., &#39;image/png&#39;).</span>
+<span class="sd">            transparent (bool): Whether the WMS layer should be transparent.</span>
+<span class="sd">            **kwargs: Additional keyword arguments for ipyleaflet.WMSLayer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Create the WMS layer using the provided parameters.</span>
+        <span class="n">wms_layer</span> <span class="o">=</span> <span class="n">WMSLayer</span><span class="p">(</span>
+            <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
+            <span class="n">layers</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
+            <span class="n">transparent</span><span class="o">=</span><span class="n">transparent</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Add the WMS layer to the map.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wms_layer</span><span class="p">)</span>
 </code></pre></div>
         </details>
 
@@ -1294,13 +1417,14 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
 
 
 <h3 id="maeson.maeson.Map.add_image" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">add_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">add_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 
 <a href="#maeson.maeson.Map.add_image" class="headerlink" title="Permanent link">&para;</a></h3>
 
     <div class="doc doc-contents ">
 
+      <p>Adds an image or animated GIF overlay to the map.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1314,39 +1438,83 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
   </thead>
   <tbody>
       <tr>
-        <td><code>image</code></td>
+        <td><code>url</code></td>
         <td><code>str</code></td>
-        <td><p>URL to the image file.</p></td>
+        <td><p>The URL of the image or GIF.</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
         <td><code>bounds</code></td>
-        <td><code>list</code></td>
-        <td><p>List of coordinates for the bounds of the image.</p></td>
-        <td><code>None</code></td>
+        <td><code>tuple</code></td>
+        <td><p>Geographic coordinates as ((south, west), (north, east)).</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>opacity</code></td>
+        <td><code>float</code></td>
+        <td><p>The transparency level of the overlay (default is 1, fully opaque).</p></td>
+        <td><code>1</code></td>
       </tr>
       <tr>
         <td><code>**kwargs</code></td>
         <td></td>
-        <td><p>Additional arguments for the ImageOverlay.</p></td>
+        <td><p>Additional keyword arguments for ipyleaflet.ImageOverlay.</p></td>
         <td><code>{}</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Exceptions:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>ValueError</code></td>
+        <td><p>If bounds is not provided or is improperly formatted.</p></td>
       </tr>
   </tbody>
 </table>
         <details class="quote">
           <summary>Source code in <code>maeson/maeson.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Args:</span>
-<span class="sd">        image (str): URL to the image file.</span>
-<span class="sd">        bounds (list): List of coordinates for the bounds of the image.</span>
-<span class="sd">        **kwargs: Additional arguments for the ImageOverlay.</span>
+<span class="sd">    Adds an image or animated GIF overlay to the map.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        url (str): The URL of the image or GIF.</span>
+<span class="sd">        bounds (tuple): Geographic coordinates as ((south, west), (north, east)).</span>
+<span class="sd">        opacity (float, optional): The transparency level of the overlay (default is 1, fully opaque).</span>
+<span class="sd">        **kwargs: Additional keyword arguments for ipyleaflet.ImageOverlay.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If bounds is not provided or is improperly formatted.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add an image to the map.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">180</span><span class="p">],</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">]]</span>
-    <span class="n">image_layer</span> <span class="o">=</span> <span class="n">ipyleaflet</span><span class="o">.</span><span class="n">ImageOverlay</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">image</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">image_layer</span><span class="p">)</span>
+
+    <span class="c1"># Validate bounds: It should be a tuple of two coordinate tuples, each of length 2.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;bounds must be a tuple in the format ((south, west), (north, east))&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Create the image overlay using ipyleaflet.ImageOverlay.</span>
+    <span class="n">overlay</span> <span class="o">=</span> <span class="n">ipyleaflet</span><span class="o">.</span><span class="n">ImageOverlay</span><span class="p">(</span>
+        <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add the overlay to the map.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">overlay</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">]</span>
 </code></pre></div>
         </details>
     </div>
@@ -1411,21 +1579,58 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
 
 
 <h3 id="maeson.maeson.Map.add_raster" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">add_raster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">add_raster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="s1">&#39;greys&#39;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 
 <a href="#maeson.maeson.Map.add_raster" class="headerlink" title="Permanent link">&para;</a></h3>
 
     <div class="doc doc-contents ">
 
-      <p>Add a raster layer to the map.</p>
+      <p>Add a raster (COG) layer to the map.</p>
+      <p>filepath (str): Path or URL to the cloud-optimized GeoTIFF (COG).
+name (str, optional): Display name for the layer.
+colormap (dict or str, optional): A colormap dictionary or a string identifier.
+opacity (float, optional): Transparency level (default is 1 for fully opaque).
+**kwargs: Additional keyword arguments to pass to the tile layer generator.</p>
 
         <details class="quote">
           <summary>Source code in <code>maeson/maeson.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_raster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a raster layer to the map.&quot;&quot;&quot;</span>
-    <span class="n">raster_layer</span> <span class="o">=</span> <span class="n">ipyleaflet</span><span class="o">.</span><span class="n">ImageOverlay</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">filepath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">raster_layer</span><span class="p">)</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_raster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;greys&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Add a raster (COG) layer to the map.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    filepath (str): Path or URL to the cloud-optimized GeoTIFF (COG).</span>
+<span class="sd">    name (str, optional): Display name for the layer.</span>
+<span class="sd">    colormap (dict or str, optional): A colormap dictionary or a string identifier.</span>
+<span class="sd">    opacity (float, optional): Transparency level (default is 1 for fully opaque).</span>
+<span class="sd">    **kwargs: Additional keyword arguments to pass to the tile layer generator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">localtileserver</span><span class="w"> </span><span class="kn">import</span> <span class="n">TileClient</span><span class="p">,</span> <span class="n">get_leaflet_tile_layer</span>
+
+    <span class="c1"># Open the raster with rasterio to inspect metadata.</span>
+    <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+        <span class="c1"># If no colormap is provided (i.e., None), try extracting it from the raster&#39;s first band.</span>
+        <span class="k">if</span> <span class="n">colormap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">colormap</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">colormap</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="c1"># Leave colormap unchanged if extraction fails.</span>
+                <span class="n">colormap</span> <span class="o">=</span> <span class="s2">&quot;greys&quot;</span>
+
+    <span class="c1"># Create the tile client from the provided file path.</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">TileClient</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+
+    <span class="c1"># Generate the leaflet tile layer using the provided parameters.</span>
+    <span class="n">tile_layer</span> <span class="o">=</span> <span class="n">get_leaflet_tile_layer</span><span class="p">(</span>
+        <span class="n">client</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="n">colormap</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add the layer to the viewer and update the center and zoom based on the raster metadata.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tile_layer</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">center</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">default_zoom</span>
 </code></pre></div>
         </details>
     </div>
@@ -1496,13 +1701,14 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
 
 
 <h3 id="maeson.maeson.Map.add_video" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">add_video</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">video</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">add_video</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 
 <a href="#maeson.maeson.Map.add_video" class="headerlink" title="Permanent link">&para;</a></h3>
 
     <div class="doc doc-contents ">
 
+      <p>Adds a video overlay to the map using ipyleaflet.VideoOverlay.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1516,39 +1722,67 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
   </thead>
   <tbody>
       <tr>
-        <td><code>video</code></td>
-        <td><code>str</code></td>
-        <td><p>URL to the video file.</p></td>
+        <td><code>url</code></td>
+        <td><code>str or list</code></td>
+        <td><p>The URL or list of URLs for the video file(s).</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
         <td><code>bounds</code></td>
-        <td><code>list</code></td>
-        <td><p>List of coordinates for the bounds of the video.</p></td>
-        <td><code>None</code></td>
+        <td><code>tuple</code></td>
+        <td><p>Geographic bounds in the format ((south, west), (north, east)).</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>opacity</code></td>
+        <td><code>float</code></td>
+        <td><p>Transparency level of the overlay (0 = fully transparent, 1 = fully opaque).</p></td>
+        <td><code>1.0</code></td>
       </tr>
       <tr>
         <td><code>**kwargs</code></td>
         <td></td>
-        <td><p>Additional arguments for the VideoOverlay.</p></td>
+        <td><p>Additional keyword arguments for ipyleaflet.VideoOverlay.</p></td>
         <td><code>{}</code></td>
       </tr>
   </tbody>
 </table>
         <details class="quote">
           <summary>Source code in <code>maeson/maeson.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_video</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">video</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_video</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Args:</span>
-<span class="sd">        video (str): URL to the video file.</span>
-<span class="sd">        bounds (list): List of coordinates for the bounds of the video.</span>
-<span class="sd">        **kwargs: Additional arguments for the VideoOverlay.</span>
+<span class="sd">    Adds a video overlay to the map using ipyleaflet.VideoOverlay.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        url (str or list): The URL or list of URLs for the video file(s).</span>
+<span class="sd">        bounds (tuple): Geographic bounds in the format ((south, west), (north, east)).</span>
+<span class="sd">        opacity (float): Transparency level of the overlay (0 = fully transparent, 1 = fully opaque).</span>
+<span class="sd">        **kwargs: Additional keyword arguments for ipyleaflet.VideoOverlay.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a video layer to the map.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mi">90</span><span class="p">,</span> <span class="o">-</span><span class="mi">180</span><span class="p">],</span> <span class="p">[</span><span class="mi">90</span><span class="p">,</span> <span class="mi">180</span><span class="p">]]</span>
-    <span class="n">video_layer</span> <span class="o">=</span> <span class="n">ipyleaflet</span><span class="o">.</span><span class="n">VideoOverlay</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">video</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">video_layer</span><span class="p">)</span>
+
+    <span class="c1"># Validate and normalize bounds format</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span>
+        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">coord</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">bounds</span>
+        <span class="p">)</span>
+    <span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;bounds must be provided as ((south, west), (north, east))&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Convert bounds to tuple of tuples</span>
+    <span class="n">bounds</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">coord</span><span class="p">)</span> <span class="k">for</span> <span class="n">coord</span> <span class="ow">in</span> <span class="n">bounds</span><span class="p">)</span>
+
+    <span class="c1"># Create and add the VideoOverlay</span>
+    <span class="n">overlay</span> <span class="o">=</span> <span class="n">VideoOverlay</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">overlay</span><span class="p">)</span>
+
+    <span class="c1"># Center the map on the video bounds</span>
+    <span class="n">south</span><span class="p">,</span> <span class="n">west</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">north</span><span class="p">,</span> <span class="n">east</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="p">[(</span><span class="n">south</span> <span class="o">+</span> <span class="n">north</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">west</span> <span class="o">+</span> <span class="n">east</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span>
 </code></pre></div>
         </details>
     </div>
@@ -1561,14 +1795,15 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
 
 
 
-<h3 id="maeson.maeson.Map.add_wms" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">add_wms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<h3 id="maeson.maeson.Map.add_wms_layer" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">add_wms_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">transparent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 
-<a href="#maeson.maeson.Map.add_wms" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#maeson.maeson.Map.add_wms_layer" class="headerlink" title="Permanent link">&para;</a></h3>
 
     <div class="doc doc-contents ">
 
+      <p>Adds a WMS (Web Map Service) layer to the map using ipyleaflet.WMSLayer.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1584,34 +1819,67 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
       <tr>
         <td><code>url</code></td>
         <td><code>str</code></td>
-        <td><p>URL to the WMS service.</p></td>
+        <td><p>Base WMS endpoint.</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
         <td><code>layers</code></td>
         <td><code>str</code></td>
-        <td><p>Comma-separated list of layers to be added.</p></td>
+        <td><p>Comma-separated layer names.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>name</code></td>
+        <td><code>str</code></td>
+        <td><p>Display name for the layer.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>format</code></td>
+        <td><code>str</code></td>
+        <td><p>Image format (e.g., 'image/png').</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>transparent</code></td>
+        <td><code>bool</code></td>
+        <td><p>Whether the WMS layer should be transparent.</p></td>
         <td><em>required</em></td>
       </tr>
       <tr>
         <td><code>**kwargs</code></td>
         <td></td>
-        <td><p>Additional arguments for the WMS layer.</p></td>
+        <td><p>Additional keyword arguments for ipyleaflet.WMSLayer.</p></td>
         <td><code>{}</code></td>
       </tr>
   </tbody>
 </table>
         <details class="quote">
           <summary>Source code in <code>maeson/maeson.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_wms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_wms_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">transparent</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Args:</span>
-<span class="sd">        url (str): URL to the WMS service.</span>
-<span class="sd">        layers (str): Comma-separated list of layers to be added.</span>
-<span class="sd">        **kwargs: Additional arguments for the WMS layer.</span>
+<span class="sd">    Adds a WMS (Web Map Service) layer to the map using ipyleaflet.WMSLayer.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        url (str): Base WMS endpoint.</span>
+<span class="sd">        layers (str): Comma-separated layer names.</span>
+<span class="sd">        name (str): Display name for the layer.</span>
+<span class="sd">        format (str): Image format (e.g., &#39;image/png&#39;).</span>
+<span class="sd">        transparent (bool): Whether the WMS layer should be transparent.</span>
+<span class="sd">        **kwargs: Additional keyword arguments for ipyleaflet.WMSLayer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a WMS layer to the map.&quot;&quot;&quot;</span>
-    <span class="n">wms_layer</span> <span class="o">=</span> <span class="n">ipyleaflet</span><span class="o">.</span><span class="n">WMSLayer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Create the WMS layer using the provided parameters.</span>
+    <span class="n">wms_layer</span> <span class="o">=</span> <span class="n">WMSLayer</span><span class="p">(</span>
+        <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
+        <span class="n">layers</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
+        <span class="n">transparent</span><span class="o">=</span><span class="n">transparent</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Add the WMS layer to the map.</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wms_layer</span><span class="p">)</span>
 </code></pre></div>
         </details>

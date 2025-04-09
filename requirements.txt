@@ -1,6 +1,6 @@
 folium
 geopandas
 ipyleaflet
+localtileserver
 numpy
 rasterio
-localtileserver

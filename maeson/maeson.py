@@ -135,17 +135,6 @@ class Map(ipyleaflet.Map):
         self.center = (obj.location[0], obj.location[1])
         self.zoom = zoom
 
-    def add_wms(self, url, layers, **kwargs):
-        """
-        Args:
-            url (str): URL to the WMS service.
-            layers (str): Comma-separated list of layers to be added.
-            **kwargs: Additional arguments for the WMS layer.
-        """
-        """Add a WMS layer to the map."""
-        wms_layer = ipyleaflet.WMSLayer(url=url, layers=layers, **kwargs)
-        self.add(wms_layer)
-
     def add_vector(self, vector, **kwargs):
         """
         Args:
@@ -156,3 +145,136 @@ class Map(ipyleaflet.Map):
         vector_layer = ipyleaflet.GeoJSON(data=vector, **kwargs)
         self.add(vector_layer)
 
+    def add_raster(self, filepath, name=None, colormap="greys", opacity=1, **kwargs):
+        """
+        Add a raster (COG) layer to the map.
+
+        Parameters:
+        filepath (str): Path or URL to the cloud-optimized GeoTIFF (COG).
+        name (str, optional): Display name for the layer.
+        colormap (dict or str, optional): A colormap dictionary or a string identifier.
+        opacity (float, optional): Transparency level (default is 1 for fully opaque).
+        **kwargs: Additional keyword arguments to pass to the tile layer generator.
+        """
+        import rasterio
+        from localtileserver import TileClient, get_leaflet_tile_layer
+
+        # Open the raster with rasterio to inspect metadata.
+        with rasterio.open(filepath) as src:
+            # If no colormap is provided (i.e., None), try extracting it from the raster's first band.
+            if colormap is None:
+                try:
+                    colormap = src.colormap(1)
+                except Exception:
+                    # Leave colormap unchanged if extraction fails.
+                    colormap = "greys"
+
+        # Create the tile client from the provided file path.
+        client = TileClient(filepath)
+
+        # Generate the leaflet tile layer using the provided parameters.
+        tile_layer = get_leaflet_tile_layer(
+            client, name=name, colormap=colormap, opacity=opacity, **kwargs
+        )
+
+        # Add the layer to the viewer and update the center and zoom based on the raster metadata.
+        self.add(tile_layer)
+        self.center = client.center()
+        self.zoom = client.default_zoom
+
+    def add_image(self, url, bounds, opacity=1, **kwargs):
+        """
+        Adds an image or animated GIF overlay to the map.
+
+        Parameters:
+            url (str): The URL of the image or GIF.
+            bounds (tuple): Geographic coordinates as ((south, west), (north, east)).
+            opacity (float, optional): The transparency level of the overlay (default is 1, fully opaque).
+            **kwargs: Additional keyword arguments for ipyleaflet.ImageOverlay.
+
+        Raises:
+            ValueError: If bounds is not provided or is improperly formatted.
+        """
+
+        # Validate bounds: It should be a tuple of two coordinate tuples, each of length 2.
+        if not (
+            isinstance(bounds, tuple)
+            and len(bounds) == 2
+            and all(isinstance(coord, tuple) and len(coord) == 2 for coord in bounds)
+        ):
+            raise ValueError(
+                "bounds must be a tuple in the format ((south, west), (north, east))"
+            )
+
+        # Create the image overlay using ipyleaflet.ImageOverlay.
+        overlay = ipyleaflet.ImageOverlay(
+            url=url, bounds=bounds, opacity=opacity, **kwargs
+        )
+
+        # Add the overlay to the map.
+        self.add(overlay)
+        self.center = [
+            (bounds[0][0] + bounds[1][0]) / 2,
+            (bounds[0][1] + bounds[1][1]) / 2,
+        ]
+
+    def add_video(self, url, bounds, opacity=1.0, **kwargs):
+        """
+        Adds a video overlay to the map using ipyleaflet.VideoOverlay.
+
+        Parameters:
+            url (str or list): The URL or list of URLs for the video file(s).
+            bounds (tuple): Geographic bounds in the format ((south, west), (north, east)).
+            opacity (float): Transparency level of the overlay (0 = fully transparent, 1 = fully opaque).
+            **kwargs: Additional keyword arguments for ipyleaflet.VideoOverlay.
+        """
+
+        # Validate and normalize bounds format
+        if not (
+            isinstance(bounds, (tuple, list))
+            and len(bounds) == 2
+            and all(
+                isinstance(coord, (tuple, list)) and len(coord) == 2 for coord in bounds
+            )
+        ):
+            raise ValueError(
+                "bounds must be provided as ((south, west), (north, east))"
+            )
+
+        # Convert bounds to tuple of tuples
+        bounds = tuple(tuple(coord) for coord in bounds)
+
+        # Create and add the VideoOverlay
+        overlay = VideoOverlay(url=url, bounds=bounds, opacity=opacity, **kwargs)
+        self.add(overlay)
+
+        # Center the map on the video bounds
+        south, west = bounds[0]
+        north, east = bounds[1]
+        self.center = [(south + north) / 2, (west + east) / 2]
+
+    def add_wms_layer(self, url, layers, name, format, transparent, **kwargs):
+        """
+        Adds a WMS (Web Map Service) layer to the map using ipyleaflet.WMSLayer.
+
+        Parameters:
+            url (str): Base WMS endpoint.
+            layers (str): Comma-separated layer names.
+            name (str): Display name for the layer.
+            format (str): Image format (e.g., 'image/png').
+            transparent (bool): Whether the WMS layer should be transparent.
+            **kwargs: Additional keyword arguments for ipyleaflet.WMSLayer.
+        """
+
+        # Create the WMS layer using the provided parameters.
+        wms_layer = WMSLayer(
+            url=url,
+            layers=layers,
+            name=name,
+            format=format,
+            transparent=transparent,
+            **kwargs,
+        )
+
+        # Add the WMS layer to the map.
+        self.add(wms_layer)

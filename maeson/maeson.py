@@ -285,7 +285,7 @@ class Map(ipyleaflet.Map):
 
     def add_basemap_dropdown(self):
         """
-        Adds a dropdown + hide button as a map control.  
+        Adds a dropdown + hide button as a map control.
         Keeps track of the current basemap layer so that selecting
         a new one removes the old and adds the new immediately.
 
@@ -294,10 +294,10 @@ class Map(ipyleaflet.Map):
         """
         # 1. define your choices
         basemap_dict = {
-            "OpenStreetMap":       basemaps.OpenStreetMap.Mapnik,
-            "OpenTopoMap":         basemaps.OpenTopoMap,
-            "Esri.WorldImagery":   basemaps.Esri.WorldImagery,
-            "CartoDB.DarkMatter":  basemaps.CartoDB.DarkMatter
+            "OpenStreetMap": basemaps.OpenStreetMap.Mapnik,
+            "OpenTopoMap": basemaps.OpenTopoMap,
+            "Esri.WorldImagery": basemaps.Esri.WorldImagery,
+            "CartoDB.DarkMatter": basemaps.CartoDB.DarkMatter,
         }
 
         # 2. build widgets
@@ -305,7 +305,7 @@ class Map(ipyleaflet.Map):
             options=list(basemap_dict.keys()),
             value="OpenStreetMap",
             layout={"width": "180px"},
-            description="Basemap:"
+            description="Basemap:",
         )
         hide_btn = widgets.Button(description="Hide", button_style="danger")
         container = widgets.VBox([dropdown, hide_btn])

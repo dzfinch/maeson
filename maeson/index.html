@@ -22,7 +22,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.11">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
     
     
       
@@ -30,7 +30,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.4af4bdda.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.2afb09e1.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
@@ -632,6 +632,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#maeson.maeson.Map.add_basemap_dropdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      add_basemap_dropdown()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#maeson.maeson.Map.add_geojson" class="md-nav__link">
     <span class="md-ellipsis">
       add_geojson()
@@ -837,6 +846,15 @@
   <a href="#maeson.maeson.Map.add_basemap" class="md-nav__link">
     <span class="md-ellipsis">
       add_basemap()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maeson.maeson.Map.add_basemap_dropdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      add_basemap_dropdown()
     </span>
   </a>
   
@@ -1269,6 +1287,57 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
 
         <span class="c1"># Add the WMS layer to the map.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">wms_layer</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_basemap_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds a dropdown + hide button as a map control.</span>
+<span class="sd">        Keeps track of the current basemap layer so that selecting</span>
+<span class="sd">        a new one removes the old and adds the new immediately.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># 1. define your choices</span>
+        <span class="n">basemap_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;OpenStreetMap&quot;</span><span class="p">:</span> <span class="n">basemaps</span><span class="o">.</span><span class="n">OpenStreetMap</span><span class="o">.</span><span class="n">Mapnik</span><span class="p">,</span>
+            <span class="s2">&quot;OpenTopoMap&quot;</span><span class="p">:</span> <span class="n">basemaps</span><span class="o">.</span><span class="n">OpenTopoMap</span><span class="p">,</span>
+            <span class="s2">&quot;Esri.WorldImagery&quot;</span><span class="p">:</span> <span class="n">basemaps</span><span class="o">.</span><span class="n">Esri</span><span class="o">.</span><span class="n">WorldImagery</span><span class="p">,</span>
+            <span class="s2">&quot;CartoDB.DarkMatter&quot;</span><span class="p">:</span> <span class="n">basemaps</span><span class="o">.</span><span class="n">CartoDB</span><span class="o">.</span><span class="n">DarkMatter</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># 2. build widgets</span>
+        <span class="n">dropdown</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
+            <span class="n">options</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">basemap_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+            <span class="n">value</span><span class="o">=</span><span class="s2">&quot;OpenStreetMap&quot;</span><span class="p">,</span>
+            <span class="n">layout</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="s2">&quot;180px&quot;</span><span class="p">},</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Basemap:&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">hide_btn</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide&quot;</span><span class="p">,</span> <span class="n">button_style</span><span class="o">=</span><span class="s2">&quot;danger&quot;</span><span class="p">)</span>
+        <span class="n">container</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">dropdown</span><span class="p">,</span> <span class="n">hide_btn</span><span class="p">])</span>
+
+        <span class="c1"># 3. add the initial basemap layer and remember it</span>
+        <span class="n">initial</span> <span class="o">=</span> <span class="n">basemap_dict</span><span class="p">[</span><span class="n">dropdown</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_basemap</span> <span class="o">=</span> <span class="n">basemap_to_tiles</span><span class="p">(</span><span class="n">initial</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_basemap</span><span class="p">)</span>
+
+        <span class="c1"># 4. when user picks a new basemap, swap layers</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_on_change</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span>
+                <span class="n">new_tiles</span> <span class="o">=</span> <span class="n">basemap_to_tiles</span><span class="p">(</span><span class="n">basemap_dict</span><span class="p">[</span><span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]])</span>
+                <span class="c1"># remove old</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_basemap</span><span class="p">)</span>
+                <span class="c1"># add new &amp; store reference</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_basemap</span> <span class="o">=</span> <span class="n">new_tiles</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_basemap</span><span class="p">)</span>
+
+        <span class="n">dropdown</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">_on_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 5. hide control if needed</span>
+        <span class="n">hide_btn</span><span class="o">.</span><span class="n">on_click</span><span class="p">(</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="nb">setattr</span><span class="p">(</span><span class="n">container</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="s2">&quot;display&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">))</span>
+
+        <span class="c1"># 6. wrap in a WidgetControl and add to map</span>
+        <span class="n">ctrl</span> <span class="o">=</span> <span class="n">WidgetControl</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">container</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s2">&quot;topright&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_control</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span>
 </code></pre></div>
         </details>
 
@@ -1347,6 +1416,97 @@ Map            (<span title="ipyleaflet.leaflet.Map">Map</span>)
     <span class="n">url</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ipyleaflet.basemaps.</span><span class="si">{</span><span class="n">basemap</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">build_url</span><span class="p">()</span>
     <span class="n">basemap_layer</span> <span class="o">=</span> <span class="n">ipyleaflet</span><span class="o">.</span><span class="n">TileLayer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">basemap</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">basemap_layer</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 id="maeson.maeson.Map.add_basemap_dropdown" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">add_basemap_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+<a href="#maeson.maeson.Map.add_basemap_dropdown" class="headerlink" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Adds a dropdown + hide button as a map control.
+Keeps track of the current basemap layer so that selecting
+a new one removes the old and adds the new immediately.</p>
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td></td>
+      <td><p>None</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>maeson/maeson.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_basemap_dropdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a dropdown + hide button as a map control.</span>
+<span class="sd">    Keeps track of the current basemap layer so that selecting</span>
+<span class="sd">    a new one removes the old and adds the new immediately.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># 1. define your choices</span>
+    <span class="n">basemap_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;OpenStreetMap&quot;</span><span class="p">:</span> <span class="n">basemaps</span><span class="o">.</span><span class="n">OpenStreetMap</span><span class="o">.</span><span class="n">Mapnik</span><span class="p">,</span>
+        <span class="s2">&quot;OpenTopoMap&quot;</span><span class="p">:</span> <span class="n">basemaps</span><span class="o">.</span><span class="n">OpenTopoMap</span><span class="p">,</span>
+        <span class="s2">&quot;Esri.WorldImagery&quot;</span><span class="p">:</span> <span class="n">basemaps</span><span class="o">.</span><span class="n">Esri</span><span class="o">.</span><span class="n">WorldImagery</span><span class="p">,</span>
+        <span class="s2">&quot;CartoDB.DarkMatter&quot;</span><span class="p">:</span> <span class="n">basemaps</span><span class="o">.</span><span class="n">CartoDB</span><span class="o">.</span><span class="n">DarkMatter</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># 2. build widgets</span>
+    <span class="n">dropdown</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
+        <span class="n">options</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">basemap_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+        <span class="n">value</span><span class="o">=</span><span class="s2">&quot;OpenStreetMap&quot;</span><span class="p">,</span>
+        <span class="n">layout</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;width&quot;</span><span class="p">:</span> <span class="s2">&quot;180px&quot;</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Basemap:&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">hide_btn</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide&quot;</span><span class="p">,</span> <span class="n">button_style</span><span class="o">=</span><span class="s2">&quot;danger&quot;</span><span class="p">)</span>
+    <span class="n">container</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">dropdown</span><span class="p">,</span> <span class="n">hide_btn</span><span class="p">])</span>
+
+    <span class="c1"># 3. add the initial basemap layer and remember it</span>
+    <span class="n">initial</span> <span class="o">=</span> <span class="n">basemap_dict</span><span class="p">[</span><span class="n">dropdown</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_current_basemap</span> <span class="o">=</span> <span class="n">basemap_to_tiles</span><span class="p">(</span><span class="n">initial</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_basemap</span><span class="p">)</span>
+
+    <span class="c1"># 4. when user picks a new basemap, swap layers</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_change</span><span class="p">(</span><span class="n">change</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span>
+            <span class="n">new_tiles</span> <span class="o">=</span> <span class="n">basemap_to_tiles</span><span class="p">(</span><span class="n">basemap_dict</span><span class="p">[</span><span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]])</span>
+            <span class="c1"># remove old</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_basemap</span><span class="p">)</span>
+            <span class="c1"># add new &amp; store reference</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_basemap</span> <span class="o">=</span> <span class="n">new_tiles</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_basemap</span><span class="p">)</span>
+
+    <span class="n">dropdown</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="n">_on_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+
+    <span class="c1"># 5. hide control if needed</span>
+    <span class="n">hide_btn</span><span class="o">.</span><span class="n">on_click</span><span class="p">(</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="nb">setattr</span><span class="p">(</span><span class="n">container</span><span class="o">.</span><span class="n">layout</span><span class="p">,</span> <span class="s2">&quot;display&quot;</span><span class="p">,</span> <span class="s2">&quot;none&quot;</span><span class="p">))</span>
+
+    <span class="c1"># 6. wrap in a WidgetControl and add to map</span>
+    <span class="n">ctrl</span> <span class="o">=</span> <span class="n">WidgetControl</span><span class="p">(</span><span class="n">widget</span><span class="o">=</span><span class="n">container</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s2">&quot;topright&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">add_control</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>

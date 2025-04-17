@@ -4,7 +4,9 @@ import ipyleaflet
 import folium
 import rasterio
 import localtileserver
-from localtileserver import TileClient, get_leaflet_tile_layer
+import ipywidgets as widgets
+from ipywidgets import Dropdown, Button, VBox
+from ipyleaflet import WidgetControl, basemaps, basemap_to_tiles
 from ipyleaflet import WMSLayer, VideoOverlay, TileLayer, LocalTileLayer
 
 
@@ -280,3 +282,54 @@ class Map(ipyleaflet.Map):
 
         # Add the WMS layer to the map.
         self.add(wms_layer)
+
+    def add_basemap_dropdown(self):
+        """
+        Adds a dropdown + hide button as a map control.
+        Keeps track of the current basemap layer so that selecting
+        a new one removes the old and adds the new immediately.
+
+        Returns:
+            None
+        """
+        # 1. define your choices
+        basemap_dict = {
+            "OpenStreetMap": basemaps.OpenStreetMap.Mapnik,
+            "OpenTopoMap": basemaps.OpenTopoMap,
+            "Esri.WorldImagery": basemaps.Esri.WorldImagery,
+            "CartoDB.DarkMatter": basemaps.CartoDB.DarkMatter,
+        }
+
+        # 2. build widgets
+        dropdown = widgets.Dropdown(
+            options=list(basemap_dict.keys()),
+            value="OpenStreetMap",
+            layout={"width": "180px"},
+            description="Basemap:",
+        )
+        hide_btn = widgets.Button(description="Hide", button_style="danger")
+        container = widgets.VBox([dropdown, hide_btn])
+
+        # 3. add the initial basemap layer and remember it
+        initial = basemap_dict[dropdown.value]
+        self._current_basemap = basemap_to_tiles(initial)
+        self.add_layer(self._current_basemap)
+
+        # 4. when user picks a new basemap, swap layers
+        def _on_change(change):
+            if change["name"] == "value":
+                new_tiles = basemap_to_tiles(basemap_dict[change["new"]])
+                # remove old
+                self.remove_layer(self._current_basemap)
+                # add new & store reference
+                self._current_basemap = new_tiles
+                self.add_layer(self._current_basemap)
+
+        dropdown.observe(_on_change, names="value")
+
+        # 5. hide control if needed
+        hide_btn.on_click(lambda _: setattr(container.layout, "display", "none"))
+
+        # 6. wrap in a WidgetControl and add to map
+        ctrl = WidgetControl(widget=container, position="topright")
+        self.add_control(ctrl)

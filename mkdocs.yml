@@ -85,4 +85,5 @@ nav:
     - API Reference:
           - maeson module: maeson.md
           - folmap module: folmap.md
+          - gistory module: gistory.md
           - common module: common.md

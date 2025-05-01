@@ -71,24 +71,6 @@ class Map(ipyleaflet.Map):
 
         self.add(ipyleaflet.LayersControl(position=position))
 
-    def add_raster(self, filepath, **kwargs):
-        """Add a raster layer to the map."""
-        raster_layer = ipyleaflet.ImageOverlay(url=filepath, **kwargs)
-        self.add(raster_layer)
-
-    def add_image(self, image, bounds=None, **kwargs):
-        """
-        Args:
-            image (str): URL to the image file.
-            bounds (list): List of coordinates for the bounds of the image.
-            **kwargs: Additional arguments for the ImageOverlay.
-        """
-        """Add an image to the map."""
-        if bounds is None:
-            bounds = [[-90, -180], [90, 180]]
-        image_layer = ipyleaflet.ImageOverlay(url=image, bounds=bounds, **kwargs)
-        self.add(image_layer)
-
     def add_geojson(self, geojson, **kwargs):
         """
         Args:
@@ -98,19 +80,6 @@ class Map(ipyleaflet.Map):
         """Add a GeoJSON layer to the map."""
         geojson_layer = ipyleaflet.GeoJSON(data=geojson, **kwargs)
         self.add(geojson_layer)
-
-    def add_video(self, video, bounds=None, **kwargs):
-        """
-        Args:
-            video (str): URL to the video file.
-            bounds (list): List of coordinates for the bounds of the video.
-            **kwargs: Additional arguments for the VideoOverlay.
-        """
-        """Add a video layer to the map."""
-        if bounds is None:
-            bounds = [[-90, -180], [90, 180]]
-        video_layer = ipyleaflet.VideoOverlay(url=video, bounds=bounds, **kwargs)
-        self.add(video_layer)
 
     def set_center(self, lat, lon, zoom=6, **kwargs):
         """

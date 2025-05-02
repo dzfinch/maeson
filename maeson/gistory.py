@@ -2,7 +2,7 @@ import json
 from ipyleaflet import GeoJSON, TileLayer
 import ipywidgets as widgets
 import ipywidgets as widgets
-from IPython.display import display
+from IPython.display import display, FileLink
 from ipyleaflet import Map, GeoJSON, TileLayer, ImageOverlay
 from ipyleaflet import TileLayer, GeoJSON, ImageOverlay
 import json
@@ -121,185 +121,137 @@ class StoryController:
 
 class SceneBuilder:
     def __init__(self, maeson_map):
-        self.map = maeson_map
-        self.layers = []
+        # 1) Core state
+        self.map         = maeson_map
+        self.layers      = []     # holds layer definitions
+        self.story       = []     # holds saved Scene objects
+        self.log_history = []     # for console logging
 
-        # Widgets
-        self.lat = widgets.FloatText(description="Lat", value=0)
-        self.lon = widgets.FloatText(description="Lon", value=0)
-        self.zoom = widgets.IntSlider(description="Zoom", min=1, max=18, value=2)
-        self.caption = widgets.Text(description="Caption")
+        # 2) Map view & metadata fields
+        self.lat         = widgets.FloatText(description="Lat", value=0)
+        self.lon         = widgets.FloatText(description="Lon", value=0)
+        self.zoom        = widgets.IntSlider(description="Zoom", min=1, max=18, value=2)
+        self.caption     = widgets.Text(description="Caption")
 
-        # Scene metadata
-        self.title = widgets.Text(description="Title", placeholder="My Scene Title")
+        self.title       = widgets.Text(description="Title", placeholder="Scene Title")
         self.order_input = widgets.IntText(description="Order", value=1, min=1)
+        self.sort_chrono = widgets.Checkbox(description="Sort Chronologically", value=False)
 
-        # Chrono‐sort toggle
-        self.sort_chrono = widgets.Checkbox(
-            value=False, description="Sort Chronologically", indent=False
+        # 3) Layer entry widgets
+        self.layer_src   = widgets.Text(description="URL/path")
+        self.bounds      = widgets.Text(
+            description="Bounds (Optional)",
+            placeholder="((S_min,W_min),(N_max,E_max))"
         )
+        self.ee_id       = widgets.Text(description="EE ID", placeholder="e.g. USGS/SRTMGL1_003")
+        self.ee_vis      = widgets.Textarea(description="vis_params", placeholder='{"min":0}')
 
-        self.layer_type = widgets.Dropdown(
-            options=[
-                "tile",
-                "geojson",
-                "image",
-                "raster",
-                "wms",
-                "video",
-                "earthengine",
-            ],
-            description="Layer type",
-        )
-        self.layer_src = widgets.Text(description="URL/path")
-        self.bounds = widgets.Text(
-            description="Bounds (optional)",
-            placeholder="[[S_min, W_min], [N_max, E_max]]",
-        )
-
-        self.add_layer_button = widgets.Button(description="➕ Add Layer")
-        self.save_scene_button = widgets.Button(description="💾 Save Scene")
-
-        self.output = widgets.Output()
-        self.story = []
-
-        self.add_layer_button.on_click(self.add_layer)
-        self.save_scene_button.on_click(self.save_scene)
-
-        self.scene_selector = widgets.Dropdown(
-            options=[], description="Scenes", layout=widgets.Layout(width="300px")
-        )
+        # 4) Scene list controls
+        self.scene_selector = widgets.Dropdown(options=[], description="Scenes",
+                                               layout=widgets.Layout(width="300px"))
         self.scene_selector.observe(self._on_scene_select, names="value")
+
+        # 5) Action buttons: Preview, Save, Update, Delete, Export, Present
         self.preview_button = widgets.Button(description="Preview")
-        self.update_button = widgets.Button(description="Update")
-        self.delete_button = widgets.Button(description="Delete")
+        self.save_scene_button = widgets.Button(description="💾 Save Scene")
+        self.update_button  = widgets.Button(description="Update")
+        self.delete_button  = widgets.Button(description="Delete")
+        self.export_button  = widgets.Button(description="Export Story", icon="save")
+        self.present_button = widgets.Button(description="▶️ Present", button_style="success")
+        
+        self.layer_src.layout = widgets.Layout(width="50%")
+        self.caption .layout = widgets.Layout(width="30%")
+        self.bounds  .layout = widgets.Layout(width="20%")
+
+        # wire up callbacks
         self.preview_button.on_click(self.preview_scene)
+        self.save_scene_button.on_click(self.save_scene)
         self.update_button.on_click(self.update_scene)
         self.delete_button.on_click(self.delete_scene)
-
-        self.scene_controls = widgets.HBox(
-            [
-                self.scene_selector,
-                self.preview_button,
-                self.update_button,
-                self.delete_button,
-            ]
-        )
-
-        ## Log Controls
-        self.log_history = []
-
-        self.output = widgets.Output(
-            layout=widgets.Layout(
-                display="block",
-                border="1px solid gray",
-                padding="6px",
-                max_height="150px",
-                overflow="auto",
-            )
-        )
-        self.toggle_log_button = widgets.ToggleButton(
-            value=True,
-            description="Hide Log",
-            tooltip="Show/hide log console",
-            icon="eye-slash",
-        )
-        self.toggle_log_button.observe(self.toggle_log_output, names="value")
-
-        # Toggle log button
-        self.toggle_log_button = widgets.ToggleButton(
-            value=True,
-            description="Hide Log",
-            tooltip="Show/hide log console",
-            icon="eye-slash",
-        )
-
-        self.toggle_log_button.observe(self.toggle_log_output, names="value")
-
-        # Export button
-        self.export_button = widgets.Button(
-            description="Export Story",
-            tooltip="Save all scenes to story.json",
-            icon="save",
-        )
         self.export_button.on_click(self.export_story)
-
-        # Output box formatting
-        self.output.layout = widgets.Layout(display="block")
-
-        # User Interface Layout
-        self.ui = widgets.VBox(
-            [
-                self.scene_controls,
-                widgets.HBox([self.title, self.order_input]),
-                widgets.HBox([self.lat, self.lon, self.zoom]),
-                self.caption,
-                widgets.HBox([self.layer_type, self.layer_src]),
-                self.bounds,
-                widgets.HBox(
-                    [self.add_layer_button, self.save_scene_button, self.export_button]
-                ),
-                self.toggle_log_button,
-                self.output,
-            ]
+        self.present_button.on_click(self._enter_present_mode)
+        self.edit_button = widgets.Button(
+            description="✏️ Edit",
+            tooltip="Return to editor",
+            button_style="info"
         )
+        self.edit_button.on_click(self._exit_present_mode)
 
-    def add_layer(self, _=None):
-        layer_type = self.layer_type.value
-        name = f"{layer_type.upper()}-{len(self.layers)}"
-        path = self.layer_src.value
-        self.layer_src = widgets.Text(description="URL/path")
-        self.layer_src.observe(self.auto_detect_layer_type, names="value")
+        self.scene_controls = widgets.HBox([
+            self.scene_selector,
+            self.save_scene_button,
+            self.preview_button,
+            self.update_button,
+            self.delete_button,
+            self.export_button,
+            self.present_button
+        ], layout=widgets.Layout(gap="10px"))
 
-        if layer_type == "tile":
+        # 6) Logging widgets
+        self.output = widgets.Output(layout=widgets.Layout(
+            display="block", border="1px solid gray", padding="6px",
+            max_height="150px", overflow="auto"
+        ))
+        self.toggle_log_button = widgets.ToggleButton(
+            value=True, description="Hide Log", icon="eye-slash"
+        )
+        self.toggle_log_button.observe(self.toggle_log_output, names="value")
+
+        # 7) Build the authoring UI
+        self.builder_ui = widgets.VBox([
+            self.scene_controls,
+            widgets.HBox([self.title, self.order_input, self.sort_chrono]),
+            widgets.HBox([self.lat, self.lon, self.zoom]),
+            # COMPACT LAYER ENTRY ROW:
+            widgets.HBox([self.layer_src, self.caption, self.bounds], layout=widgets.Layout(gap="10px")),
+            widgets.HBox([self.ee_id, self.ee_vis]),
+            self.toggle_log_button,
+            self.output,
+        ])
+
+        self.main_container = widgets.VBox([ self.builder_ui ])
+
+    def display(self):
+        from IPython.display import display
+        display(self.main_container)
+        
+    def add_layer(self, _=None, commit=True):
+        path = self.layer_src.value.strip()
+        lt   = self.detect_layer_type(path) 
+        name = f"{lt.upper()}-{len(self.layers)}"
+
+        if lt == "tile":
             self.map.add_tile(url=path, name=name)
-
-        elif layer_type == "geojson":
-            self.map.add_geojson(path, name=name)
-
-        elif layer_type == "image":
-            try:
-                bounds = eval(self.bounds.value)
-                self.map.add_image(path, bounds=bounds, name=name)
-            except Exception as e:
-                with self.output:
-                    print(f"Error adding image layer: {e}")
-
-        elif layer_type == "raster":
-            self.map.add_raster(path, name=name)
-
-        elif layer_type == "wms":
+        elif lt == "geojson":
+            self.map.add_geojson(path=path, name=name)
+        elif lt == "image":
+            bounds = eval(self.bounds.value)
+            self.map.add_image(url=path, bounds=bounds, name=name)
+        elif lt == "raster":
+            self.map.add_raster(path)
+        elif lt == "wms":
             self.map.add_wms_layer(url=path, name=name)
-
-        elif layer_type == "video":
+        elif lt == "video":
             self.map.add_video(path, name=name)
-
-        elif layer_type == "earthengine":
-            import ee
-
-            try:
-                ee_id = self.ee_id.value.strip()
-                vis = json.loads(self.ee_vis.value) if self.ee_vis.value else {}
-                self.map.add_earthengine(ee_id, vis_params=vis, name=name)
-            except Exception as e:
-                with self.output:
-                    print(f"EE error: {e}")
+        elif lt == "earthengine":
+            ee_id = self.ee_id.value.strip()
+            vis   = json.loads(self.ee_vis.value or "{}")
+            self.map.add_earthengine(ee_id=ee_id, vis_params=vis, name=name)
         else:
-            with self.output:
-                print(f"Unsupported layer type: {layer_type}")
-            return
+            return self.log(f"❌ Could not detect layer type for: {path}")
 
-        self.layers.append(
-            {
-                "type": layer_type,
-                "path": path,
-                "name": name,
-                "bounds": eval(self.bounds.value) if layer_type == "image" else None,
-            }
-        )
-
-        self.log(f"✅ Added {layer_type} layer: {name}")
-
+        # only append if commit
+        if commit:
+            self.layers.append({
+                "type":   lt,
+                "path":   path,
+                "name":   name,
+                "bounds": eval(self.bounds.value) if lt=="image" else None,
+                "ee_id":  self.ee_id.value.strip()       if lt=="earthengine" else None,
+                "vis_params": json.loads(self.ee_vis.value or "{}") if lt=="earthengine" else None
+            })
+        self.log(f"✅ Added {lt} layer: {name}")
+        
     def detect_layer_type(path):
         path = path.lower()
 
@@ -322,6 +274,7 @@ class SceneBuilder:
         if "amazonaws.com" in path and path.endswith(".tif"):
             return "raster"
         return "unknown"
+
 
     def save_scene(self, _=None):
         # 1) Read metadata
@@ -348,9 +301,6 @@ class SceneBuilder:
         self.title.value = ""
         self.order_input.value = len(self.story) + 1
         self.log(f"✅ Saved scene “{scene_title}” at position {scene_order}")
-
-    def display(self):
-        display(self.ui)
 
     def refresh_scene_list(self):
         options = []
@@ -395,53 +345,58 @@ class SceneBuilder:
         self.log(f"Deleted scene {i}.")
 
     def preview_scene(self, _=None):
-        # Set map center and zoom
+        # 1) Read the raw URL/path
+        src = self.layer_src.value.strip()
+        if not src:
+            return self.log("❌ No URL/path entered")
+
+        # 2) Auto-detect the layer type
+        lt = self.detect_layer_type(src)
+        if lt == "unknown":
+            return self.log(f"❌ Could not detect layer type for: {src}")
+
+        # 3) Build a new layer_def
+        name = f"{lt.upper()}-{len(self.layers)}"
+        layer_def = {"type": lt, "path": src, "name": name}
+
+        # 4) Add any extra params
+        if lt == "image":
+            # bounds is required for images
+            try:
+                layer_def["bounds"] = eval(self.bounds.value)
+            except:
+                return self.log("❌ Invalid bounds syntax")
+        elif lt == "earthengine":
+            # EE needs id + vis_params
+            ee_id = self.ee_id.value.strip()
+            try:
+                vis = json.loads(self.ee_vis.value or "{}")
+            except:
+                return self.log("❌ Invalid EE vis_params JSON")
+            layer_def["ee_id"]      = ee_id
+            layer_def["vis_params"] = vis
+
+        # 5) Commit into your scene’s layer list
+        self.layers.append(layer_def)
+
+        # 6) Reset map view
         self.map.center = (self.lat.value, self.lon.value)
-        self.map.zoom = self.zoom.value
+        self.map.zoom   = self.zoom.value
 
-        # Clear existing non-base layers
-        layers_to_remove = self.map.layers[1:]  # Preserve base layer
-        for layer in layers_to_remove:
-            self.map.remove_layer(layer)
+        # 7) Clear existing overlays (keeping only base)
+        for lyr in list(self.map.layers)[1:]:
+            self.map.remove_layer(lyr)
 
-        # Re-add layers defined in self.layers
-        for layer_def in self.layers:
-            layer_type = layer_def.get("type")
-            path = layer_def.get("path") or layer_def.get("url")
-            name = layer_def.get("name", f"{layer_type}-layer")
+        # 8) Replay _all_ saved layers via your helper
+        for ld in self.layers:
+            try:
+                self._apply_layer_def(ld)
+            except Exception as e:
+                self.log(f"❌ Failed to apply {ld['name']}: {e}")
 
-            if layer_type == "tile":
-                layer = TileLayer(url=path, name=name)
-                self.map.add_layer(layer)
+        # 9) Log success
+        self.log(f"✅ Previewed scene with {len(self.layers)} layers (detected types)")
 
-            elif layer_type == "geojson":
-                try:
-                    with open(path) as f:
-                        data = json.load(f)
-                    layer = GeoJSON(data=data, name=name)
-                    self.map.add_layer(layer)
-                except Exception as e:
-                    with self.output:
-                        print(f"Error loading GeoJSON: {e}")
-
-            elif layer_type == "image":
-                try:
-                    bounds = layer_def.get("bounds")
-                    if not bounds:
-                        bounds = eval(self.bounds.value)
-                    layer = ImageOverlay(url=path, bounds=bounds, name=name)
-                    self.map.add_layer(layer)
-                except Exception as e:
-                    with self.output:
-                        print(f"Error loading ImageOverlay: {e}")
-
-        self.log("Previewed scene on map.")
-
-    def auto_detect_layer_type(self, change):
-        path = change["new"]
-        detected = self.detect_layer_type(path)
-        if detected in [option for option, _ in self.layer_type.options]:
-            self.layer_type.value = detected
 
     def log(self, message):
         """
@@ -458,15 +413,6 @@ class SceneBuilder:
             with self.output:
                 self.output.clear_output(wait=True)
                 print(self.log_history[-1])
-
-    def _render_log(self):
-        """
-        Clear and print every message in log_history.
-        """
-        with self.output:
-            self.output.clear_output(wait=True)
-            for msg in self.log_history:
-                print(msg)
 
     def toggle_log_output(self, change):
         """
@@ -520,3 +466,85 @@ class SceneBuilder:
         # Log and show link
         self.log(f"✅ Story exported to {fn}")
         display(FileLink(fn))
+        
+    def _load_def_into_ui(self, layer_def):
+        """
+        Copy a saved layer definition back into the builder widgets
+        so that preview_scene can pick it up.
+        """
+        # URL or local path:
+        self.layer_src.value = layer_def.get("path") or layer_def.get("url", "")
+
+        # If it’s an image overlay, restore the bounds text:
+        if layer_def["type"] == "image":
+            self.bounds.value = repr(layer_def["bounds"])
+
+        # If it’s an Earth Engine layer, restore ID and vis params:
+        if layer_def["type"] == "earthengine":
+            self.ee_id.value  = layer_def.get("ee_id", "")
+            self.ee_vis.value = json.dumps(layer_def.get("vis_params", {}))
+
+    def _apply_layer_def(self, ld):
+        """
+        Load a single saved layer_def dict directly onto the map.
+        """
+        t = ld["type"]
+        name = ld.get("name", None)
+
+        self.log(f"→ Applying {t} layer: {name or ld['path']}")
+
+        if t == "tile":
+            self.map.add_tile(url=ld["path"], name=name)
+
+        elif t == "geojson":
+            self.map.add_geojson(path=ld["path"], name=name)
+
+        elif t == "image":
+            self.map.add_image(url=ld["path"],
+                            bounds=ld["bounds"],
+                            name=name)
+
+        elif t == "raster":
+            self.map.add_raster(ld["path"], name=name)
+
+        elif t == "wms":
+            self.map.add_wms_layer(url=ld["path"], name=name)
+
+        elif t == "video":
+            self.map.add_video(path=ld["path"], name=name)
+
+        elif t == "earthengine":
+            import ee
+            vis = ld.get("vis_params", {})
+            self.map.add_earthengine(ee_id=ld["ee_id"],
+                                    vis_params=vis,
+                                    name=name)
+
+        else:
+            self.log(f"❌ Unknown layer type: {t}")
+            
+    def _enter_present_mode(self, _=None):
+        # build your StoryController as before
+        scenes = sorted(self.story, key=lambda s: s.order)
+        story_obj = Story(scenes)
+        controller = StoryController(story_obj, self.map)
+        
+        # show the Edit button above the presenter interface
+        self.main_container.children = [
+            widgets.HBox([ self.edit_button ], layout=widgets.Layout(justify_content="flex-end")),
+            controller.interface
+        ]
+        
+    def _exit_present_mode(self, _=None):
+        # put back your authoring UI + Present button
+        self.main_container.children = self._editor_children
+
+
+    def _render_log(self):
+        """
+        Clear and print every message in log_history.
+        """
+        with self.output:
+            self.output.clear_output(wait=True)
+            for msg in self.log_history:
+                print(msg)

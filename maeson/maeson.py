@@ -152,8 +152,6 @@ class Map(ipyleaflet.Map):
 
         # Add the layer to the viewer and update the center and zoom based on the raster metadata.
         self.add(tile_layer)
-        self.center = client.center()
-        self.zoom = client.default_zoom
 
     def add_image(self, url, bounds, opacity=1, **kwargs):
         """

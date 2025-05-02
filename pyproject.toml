@@ -75,7 +75,7 @@ maeson = ["notebooks/*.ipynb", "notebooks/data/*"]
 universal = true
 
 [tool.bumpversion]
-current_version = "0.0.2"
+current_version = "0.0.3"
 commit = true
 tag = true
 

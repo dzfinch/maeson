@@ -1269,22 +1269,24 @@ SceneBuilder        </code>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_output</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
 
-        <span class="c1"># 7) Build the authoring UI</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">scene_controls</span><span class="p">,</span>
-                <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_chrono</span><span class="p">]),</span>
-                <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">]),</span>
-                <span class="c1"># COMPACT LAYER ENTRY ROW:</span>
-                <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">(</span>
-                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">],</span>
-                    <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">),</span>
-                <span class="p">),</span>
-                <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_vis</span><span class="p">]),</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
+        <span class="c1"># inside __init__, just before you build builder_ui:</span>
+
+        <span class="c1"># pick out the actual widget</span>
+        <span class="n">map_widget</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">,</span> <span class="s2">&quot;map&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span>
+
+        <span class="c1"># 7) Build the authoring UI, starting with the map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span>
+            <span class="n">map_widget</span><span class="p">,</span>   <span class="c1"># ← show the map in editor mode</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scene_controls</span><span class="p">,</span>
+            <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_chrono</span><span class="p">]),</span>
+            <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">]),</span>
+            <span class="c1"># compact entry row</span>
+            <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">],</span>
+                        <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">)),</span>
+            <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_vis</span><span class="p">]),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
+        <span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">main_container</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span><span class="p">])</span>
 
@@ -1336,29 +1338,6 @@ SceneBuilder        </code>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Added </span><span class="si">{</span><span class="n">lt</span><span class="si">}</span><span class="s2"> layer: </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">detect_layer_type</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;projects/&quot;</span><span class="p">)</span>
-            <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;http&quot;</span><span class="p">)</span>
-        <span class="p">):</span>
-            <span class="k">return</span> <span class="s2">&quot;earthengine&quot;</span>
-        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">path</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">{z}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{x}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{y}</span><span class="s2">&quot;</span><span class="p">]):</span>
-            <span class="k">return</span> <span class="s2">&quot;tile&quot;</span>
-        <span class="k">if</span> <span class="s2">&quot;service=wms&quot;</span> <span class="ow">in</span> <span class="n">path</span> <span class="ow">or</span> <span class="s2">&quot;request=getmap&quot;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;wms&quot;</span>
-        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.geojson&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="s2">&quot;geojson&quot;</span>
-        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.tif&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.tiff&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="s2">&quot;raster&quot;</span>
-        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.png&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.jpg&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.jpeg&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="s2">&quot;image&quot;</span>
-        <span class="k">if</span> <span class="s2">&quot;amazonaws.com&quot;</span> <span class="ow">in</span> <span class="n">path</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.tif&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="s2">&quot;raster&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;unknown&quot;</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">save_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># 1) Read metadata</span>
         <span class="n">scene_title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;Scene </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -1392,16 +1371,39 @@ SceneBuilder        </code>
             <span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">label</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scene_selector</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">load_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># 1) Find the selected scene</span>
         <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene_selector</span><span class="o">.</span><span class="n">index</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
+
         <span class="n">scene</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># 2) Populate the form fields</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">center</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">zoom</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">caption</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded scene </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span>               <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">zoom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="o">.</span><span class="n">value</span>            <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">caption</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">value</span>              <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">title</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order_input</span><span class="o">.</span><span class="n">value</span>        <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">order</span>
+
+        <span class="c1"># 3) Reset our internal layer list to this scene’s layers</span>
+        <span class="c1">#    (so we don’t accumulate layers from previous edits)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">ld</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">ld</span> <span class="ow">in</span> <span class="n">scene</span><span class="o">.</span><span class="n">layers</span><span class="p">]</span>
+
+        <span class="c1"># 4) Clear existing non‑base layers from the map</span>
+        <span class="k">for</span> <span class="n">lyr</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">layers</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="n">lyr</span><span class="p">)</span>
+
+        <span class="c1"># 5) Replay just this scene’s layers onto the map</span>
+        <span class="k">for</span> <span class="n">ld</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_apply_layer_def</span><span class="p">(</span><span class="n">ld</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Failed to apply </span><span class="si">{</span><span class="n">ld</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 6) Feedback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded scene </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: “</span><span class="si">{</span><span class="n">scene</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">”&quot;</span><span class="p">)</span>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">update_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
         <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene_selector</span><span class="o">.</span><span class="n">index</span>
@@ -1428,57 +1430,61 @@ SceneBuilder        </code>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted scene </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">preview_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># 1) Read the raw URL/path</span>
+        <span class="c1"># 1) Read &amp; validate the source</span>
         <span class="n">src</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_src</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">src</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;❌ No URL/path entered&quot;</span><span class="p">)</span>
 
-        <span class="c1"># 2) Auto-detect the layer type</span>
-        <span class="n">lt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_layer_type</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+        <span class="c1"># 2) Let detect_layer_type tell us what it is</span>
+        <span class="n">lt</span> <span class="o">=</span> <span class="n">detect_layer_type</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">lt</span> <span class="o">==</span> <span class="s2">&quot;unknown&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Could not detect layer type for: </span><span class="si">{</span><span class="n">src</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="c1"># 3) Build a new layer_def</span>
+        <span class="c1"># 3) Build the new layer_def</span>
         <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lt</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">layer_def</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">lt</span><span class="p">,</span> <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">src</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+        <span class="n">layer_def</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">lt</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
 
-        <span class="c1"># 4) Add any extra params</span>
+        <span class="c1"># geojson &amp; raster need a path, others use url</span>
+        <span class="k">if</span> <span class="n">lt</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;geojson&quot;</span><span class="p">,</span> <span class="s2">&quot;raster&quot;</span><span class="p">):</span>
+            <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">src</span>
+
+        <span class="c1"># 4) Extras: bounds for images, EE params for earthengine</span>
         <span class="k">if</span> <span class="n">lt</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
-            <span class="c1"># bounds is required for images</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;bounds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;❌ Invalid bounds syntax&quot;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">lt</span> <span class="o">==</span> <span class="s2">&quot;earthengine&quot;</span><span class="p">:</span>
-            <span class="c1"># EE needs id + vis_params</span>
             <span class="n">ee_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_id</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">vis</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_vis</span><span class="o">.</span><span class="n">value</span> <span class="ow">or</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;❌ Invalid EE vis_params JSON&quot;</span><span class="p">)</span>
-            <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;ee_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ee_id</span>
+            <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;ee_id&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">ee_id</span>
             <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;vis_params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vis</span>
 
-        <span class="c1"># 5) Commit into your scene’s layer list</span>
+        <span class="c1"># 5) Commit into the scene’s layer list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_def</span><span class="p">)</span>
 
-        <span class="c1"># 6) Reset map view</span>
+        <span class="c1"># 6) Reset the map view</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">zoom</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span>
 
-        <span class="c1"># 7) Clear existing overlays (keeping only base)</span>
+        <span class="c1"># 7) Clear existing overlays (keep only base)</span>
         <span class="k">for</span> <span class="n">lyr</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">layers</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">remove_layer</span><span class="p">(</span><span class="n">lyr</span><span class="p">)</span>
 
-        <span class="c1"># 8) Replay _all_ saved layers via your helper</span>
+        <span class="c1"># 8) Replay all saved layers via your helper</span>
         <span class="k">for</span> <span class="n">ld</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_apply_layer_def</span><span class="p">(</span><span class="n">ld</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Failed to apply </span><span class="si">{</span><span class="n">ld</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="c1"># 9) Log success</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Previewed scene with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span><span class="si">}</span><span class="s2"> layers (detected types)&quot;</span><span class="p">)</span>
+        <span class="c1"># 9) Final feedback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Previewed scene with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span><span class="si">}</span><span class="s2"> layers&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1603,22 +1609,22 @@ SceneBuilder        </code>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Unknown layer type: </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_enter_present_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># build your StoryController as before</span>
-        <span class="n">scenes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
+        <span class="c1"># 1) Build the StoryController</span>
+        <span class="n">scenes</span>    <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
         <span class="n">story_obj</span> <span class="o">=</span> <span class="n">Story</span><span class="p">(</span><span class="n">scenes</span><span class="p">)</span>
-        <span class="n">controller</span> <span class="o">=</span> <span class="n">StoryController</span><span class="p">(</span><span class="n">story_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span>
+        <span class="n">teller</span>    <span class="o">=</span> <span class="n">StoryController</span><span class="p">(</span><span class="n">story_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span>
 
-        <span class="c1"># show the Edit button above the presenter interface</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_container</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">(</span>
-                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_button</span><span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">justify_content</span><span class="o">=</span><span class="s2">&quot;flex-end&quot;</span><span class="p">)</span>
-            <span class="p">),</span>
-            <span class="n">controller</span><span class="o">.</span><span class="n">interface</span><span class="p">,</span>
-        <span class="p">]</span>
+        <span class="c1"># 2) Replace main_container with [edit_button row, presenter]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_button</span><span class="p">],</span>
+            <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">justify_content</span><span class="o">=</span><span class="s2">&quot;flex-end&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_container</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">header</span><span class="p">,</span> <span class="n">teller</span><span class="o">.</span><span class="n">interface</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_exit_present_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1"># put back your authoring UI + Present button</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_container</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_editor_children</span>
+        <span class="c1"># Simply restore the builder UI as the sole child</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_container</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span><span class="p">]</span>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_render_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1634,7 +1640,6 @@ SceneBuilder        </code>
 
 
   <div class="doc doc-children">
-
 
 
 
@@ -2060,6 +2065,7 @@ StoryController        </code>
     </div>
 
   </div>
+
 
 
 

@@ -186,7 +186,7 @@ class SceneBuilder:
             lambda change: self._update_map_center(lon=change["new"]), names="value"
         )
 
-        # Link map to widgets —
+        # Link map to widgets
 
         self.map.observe(self._on_map_center_change, names="center")
         self.map.observe(self._on_map_zoom_change, names="zoom")
@@ -269,6 +269,7 @@ class SceneBuilder:
         )
         self.toggle_log_button.observe(self.toggle_log_output, names="value")
 
+        # Custom code editor widgets
         self.custom_code = widgets.Textarea(
             value=(
                 "# Enter Python code here using the variable `map`.\n"
@@ -283,8 +284,6 @@ class SceneBuilder:
             tooltip="Execute the code above",
         )
         self.run_code_button.on_click(self._run_custom_code)
-
-        # 2) Wrap them in a container we'll show/hide
         self.code_container = VBox(
             [
                 HTML("<b>Custom Python:</b>"),
@@ -294,12 +293,11 @@ class SceneBuilder:
             layout=Layout(display="block", gap="6px"),
         )
 
-        # 3) Build your two toggle buttons
+        # Toggle buttons
         self.toggle_log_button = ToggleButton(
             value=True, description="Hide Log", icon="list", tooltip="Show/hide log"
         )
         self.toggle_log_button.observe(self.toggle_log_output, names="value")
-
         self.toggle_code_button = ToggleButton(
             value=True,
             description="Hide Code",
@@ -308,15 +306,14 @@ class SceneBuilder:
         )
         self.toggle_code_button.observe(self._toggle_code, names="value")
 
-        # 4) Put the toggles side‐by‐side
         self.toggle_row = HBox(
             [self.toggle_log_button, self.toggle_code_button], layout=Layout(gap="10px")
         )
 
-        # 5) Grab your map widget
+        # Map widget
         map_widget = getattr(self.map, "map", self.map)
 
-        # 6) Finally build the authoring UI in one shot
+        # Authoring UI
         self.builder_ui = VBox(
             [
                 map_widget,
@@ -327,7 +324,6 @@ class SceneBuilder:
                     [self.layer_src, self.caption, self.bounds],
                     layout=Layout(gap="10px"),
                 ),
-                HBox([self.ee_id, self.ee_vis]),
                 self.toggle_row,  # both toggles here
                 self.output,
                 self.code_container,  # code editor below
@@ -335,7 +331,7 @@ class SceneBuilder:
             layout=Layout(gap="10px"),
         )
 
-        # 7) Wrap into your main container
+        # 7) Main container
         self.main_container = VBox([self.builder_ui])
 
     def display(self):

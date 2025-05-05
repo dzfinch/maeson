@@ -1,18 +1,28 @@
 """Main module."""
 
 import ipyleaflet
+import ipywidgets
 import folium
 import rasterio
 import localtileserver
-import ipywidgets as widgets
-from ipywidgets import Dropdown, Button, VBox
-from ipyleaflet import WidgetControl, basemaps, basemap_to_tiles
-from ipyleaflet import WMSLayer, VideoOverlay, TileLayer, LocalTileLayer
+import ee
+import geemap
+from ipywidgets import widgets, Dropdown, Button, VBox
+from ipyleaflet import WidgetControl, basemaps, basemap_to_tiles, WMSLayer, VideoOverlay, TileLayer, LocalTileLayer, DrawControl
 
+try:
+    # primary: use leafmap if installed
+    from leafmap.leafmap import Map as Leafmap
+except ImportError:
+    # fallback to pure ipyleaflet
+    from ipyleaflet import Map as LeafletMap
+    Leafmap = LeafletMap
 
-class Map(ipyleaflet.Map):
-    def __init__(self, center=[20, 0], zoom=2, **kwargs):
-        super(Map, self).__init__(center=center, zoom=zoom, **kwargs)
+class Map(Leafmap):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("toolbar_control", False)
+        kwargs.setdefault("layer_control", True)
+        super().__init__(*args, **kwargs)
 
     def add_basemap(self, basemap="Esri.WorldImagery"):
         """
@@ -189,40 +199,43 @@ class Map(ipyleaflet.Map):
             (bounds[0][1] + bounds[1][1]) / 2,
         ]
 
-    def add_video(self, url, bounds, opacity=1.0, **kwargs):
+    def add_video(
+        self,
+        url: str,
+        bounds,
+        opacity: float = 1.0,
+        autoplay: bool = True,
+        loop: bool = True,
+        muted: bool = True,
+        **kwargs
+    ):
         """
         Adds a video overlay to the map using ipyleaflet.VideoOverlay.
-
-        Parameters:
-            url (str or list): The URL or list of URLs for the video file(s).
-            bounds (tuple): Geographic bounds in the format ((south, west), (north, east)).
-            opacity (float): Transparency level of the overlay (0 = fully transparent, 1 = fully opaque).
-            **kwargs: Additional keyword arguments for ipyleaflet.VideoOverlay.
         """
-
-        # Validate and normalize bounds format
+        # 1) Validate & normalize bounds
         if not (
             isinstance(bounds, (tuple, list))
             and len(bounds) == 2
-            and all(
-                isinstance(coord, (tuple, list)) and len(coord) == 2 for coord in bounds
-            )
+            and all(isinstance(c, (tuple, list)) and len(c) == 2 for c in bounds)
         ):
-            raise ValueError(
-                "bounds must be provided as ((south, west), (north, east))"
-            )
+            raise ValueError("bounds must be ((south, west), (north, east))")
 
-        # Convert bounds to tuple of tuples
-        bounds = tuple(tuple(coord) for coord in bounds)
+        bounds = [list(bounds[0]), list(bounds[1])]
 
-        # Create and add the VideoOverlay
-        overlay = VideoOverlay(url=url, bounds=bounds, opacity=opacity, **kwargs)
-        self.add(overlay)
+        # 2) Create the VideoOverlay (url must be a string)
+        overlay = VideoOverlay(
+            url=url,
+            bounds=bounds,
+            opacity=opacity,
+            autoplay=autoplay,
+            loop=loop,
+            muted=muted,
+            **kwargs
+        )
 
-        # Center the map on the video bounds
-        south, west = bounds[0]
-        north, east = bounds[1]
-        self.center = [(south + north) / 2, (west + east) / 2]
+        # 3) Add to map and fit to the bounds
+        self.add_layer(overlay)  # or self.map.add_layer if you wrap it
+        self.fit_bounds(bounds)
 
     def add_wms_layer(self, url, layers, name, format, transparent, **kwargs):
         """
@@ -300,3 +313,47 @@ class Map(ipyleaflet.Map):
         # 6. wrap in a WidgetControl and add to map
         ctrl = WidgetControl(widget=container, position="topright")
         self.add_control(ctrl)
+        
+    def add_earthengine(self, ee_object, vis_params=None, name="EE Layer"):
+        """
+        Adds an Earth Engine layer to the map.
+        
+        Parameters
+        ----------
+        ee_object : ee.Image, ee.ImageCollection, or str
+            If str, will be wrapped as ee.Image; for ImageCollection, 
+            you should reduce it (e.g. .mean()) before passing.
+        vis_params : dict, optional
+            Visualization parameters, e.g. {"min":0,"max":3000,"palette":["blue","red"]}.
+        name : str, optional
+            A display name for the layer.
+        """
+        # 1) Initialize EE if needed
+        try:
+            ee.Initialize()
+        except Exception:
+            ee.Authenticate()
+            ee.Initialize()
+
+        # 2) Wrap strings into Images
+        if isinstance(ee_object, str):
+            ee_object = ee.Image(ee_object)
+
+        # 3) Build the TileLayer via geemap helper
+        vis_params = vis_params or {}
+        tile_layer = geemap.ee_tile_layer(ee_object, vis_params, name)
+
+        # 4) Add to the map
+        self.add_layer(tile_layer)
+
+        # 5) Optionally fit bounds (EE layers often global)
+        # comment this out if you don’t want auto‑zoom
+        try:
+            bounds = ee_object.geometry().bounds().getInfo()["coordinates"][0]
+            # bounds is [[lon, lat], …], ipyleaflet wants [[lat, lon], …]
+            latlng_bounds = [[lat, lon] for lon, lat in bounds]
+            self.fit_bounds(latlng_bounds)
+        except Exception:
+            pass
+
+        return tile_layer

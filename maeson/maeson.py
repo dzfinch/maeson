@@ -8,7 +8,16 @@ import localtileserver
 import ee
 import geemap
 from ipywidgets import widgets, Dropdown, Button, VBox
-from ipyleaflet import WidgetControl, basemaps, basemap_to_tiles, WMSLayer, VideoOverlay, TileLayer, LocalTileLayer, DrawControl
+from ipyleaflet import (
+    WidgetControl,
+    basemaps,
+    basemap_to_tiles,
+    WMSLayer,
+    VideoOverlay,
+    TileLayer,
+    LocalTileLayer,
+    DrawControl,
+)
 
 try:
     # primary: use leafmap if installed
@@ -16,7 +25,9 @@ try:
 except ImportError:
     # fallback to pure ipyleaflet
     from ipyleaflet import Map as LeafletMap
+
     Leafmap = LeafletMap
+
 
 class Map(Leafmap):
     def __init__(self, *args, **kwargs):
@@ -207,7 +218,7 @@ class Map(Leafmap):
         autoplay: bool = True,
         loop: bool = True,
         muted: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """
         Adds a video overlay to the map using ipyleaflet.VideoOverlay.
@@ -230,7 +241,7 @@ class Map(Leafmap):
             autoplay=autoplay,
             loop=loop,
             muted=muted,
-            **kwargs
+            **kwargs,
         )
 
         # 3) Add to map and fit to the bounds
@@ -313,15 +324,15 @@ class Map(Leafmap):
         # 6. wrap in a WidgetControl and add to map
         ctrl = WidgetControl(widget=container, position="topright")
         self.add_control(ctrl)
-        
+
     def add_earthengine(self, ee_object, vis_params=None, name="EE Layer"):
         """
         Adds an Earth Engine layer to the map.
-        
+
         Parameters
         ----------
         ee_object : ee.Image, ee.ImageCollection, or str
-            If str, will be wrapped as ee.Image; for ImageCollection, 
+            If str, will be wrapped as ee.Image; for ImageCollection,
             you should reduce it (e.g. .mean()) before passing.
         vis_params : dict, optional
             Visualization parameters, e.g. {"min":0,"max":3000,"palette":["blue","red"]}.

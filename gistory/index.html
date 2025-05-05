@@ -1179,17 +1179,33 @@ SceneBuilder        </code>
           <summary>Source code in <code>maeson/gistory.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SceneBuilder</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maeson_map</span><span class="p">):</span>
-        <span class="c1"># 1) Core state</span>
+        <span class="c1"># Core state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map</span> <span class="o">=</span> <span class="n">maeson_map</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># holds layer definitions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">story</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># holds saved Scene objects</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log_history</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># for console logging</span>
 
-        <span class="c1"># 2) Map view &amp; metadata fields</span>
+        <span class="c1"># Map view &amp; metadata fields</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">FloatText</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Lat&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lon</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">FloatText</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Lon&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntSlider</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Zoom&quot;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">caption</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Caption&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Zoom slider directly to map.zoom</span>
+        <span class="n">jslink</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">,</span> <span class="s2">&quot;zoom&quot;</span><span class="p">))</span>
+
+        <span class="c1"># For center, we’ll do observers:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">change</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_map_center</span><span class="p">(</span><span class="n">lat</span><span class="o">=</span><span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]),</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">change</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_map_center</span><span class="p">(</span><span class="n">lon</span><span class="o">=</span><span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]),</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Link map to widgets —</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_map_center_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_map_zoom_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;zoom&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Title&quot;</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Scene Title&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">order_input</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">IntText</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Order&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -1197,7 +1213,7 @@ SceneBuilder        </code>
             <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Sort Chronologically&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
 
-        <span class="c1"># 3) Layer entry widgets</span>
+        <span class="c1"># Layer entry widgets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layer_src</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;URL/path&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span>
             <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Bounds (Optional)&quot;</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;((S_min,W_min),(N_max,E_max))&quot;</span>
@@ -1209,13 +1225,13 @@ SceneBuilder        </code>
             <span class="n">description</span><span class="o">=</span><span class="s2">&quot;vis_params&quot;</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="s1">&#39;{&quot;min&quot;:0}&#39;</span>
         <span class="p">)</span>
 
-        <span class="c1"># 4) Scene list controls</span>
+        <span class="c1"># Scene list controls</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scene_selector</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Dropdown</span><span class="p">(</span>
             <span class="n">options</span><span class="o">=</span><span class="p">[],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Scenes&quot;</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="s2">&quot;300px&quot;</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scene_selector</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_scene_select</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
 
-        <span class="c1"># 5) Action buttons: Preview, Save, Update, Delete, Export, Present</span>
+        <span class="c1"># Action buttons: Preview, Save, Update, Delete, Export, Present</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">preview_button</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Preview&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save_scene_button</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;💾 Save Scene&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_button</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Update&quot;</span><span class="p">)</span>
@@ -1254,7 +1270,7 @@ SceneBuilder        </code>
             <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="c1"># 6) Logging widgets</span>
+        <span class="c1"># Logging widgets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Output</span><span class="p">(</span>
             <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span>
                 <span class="n">display</span><span class="o">=</span><span class="s2">&quot;block&quot;</span><span class="p">,</span>
@@ -1269,26 +1285,74 @@ SceneBuilder        </code>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_output</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
 
-        <span class="c1"># inside __init__, just before you build builder_ui:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_code</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Textarea</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="p">(</span>
+                <span class="s2">&quot;# Enter Python code here using the variable `map`.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;# e.g. map.add_heatmap(data=&#39;points.csv&#39;, latitude=&#39;lat&#39;, longitude=&#39;lon&#39;)&quot;</span>
+            <span class="p">),</span>
+            <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Write Python snippet…&quot;</span><span class="p">,</span>
+            <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="s2">&quot;100%&quot;</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s2">&quot;150px&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_code_button</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Button</span><span class="p">(</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Run Code&quot;</span><span class="p">,</span>
+            <span class="n">button_style</span><span class="o">=</span><span class="s2">&quot;info&quot;</span><span class="p">,</span>
+            <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Execute the code above&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_code_button</span><span class="o">.</span><span class="n">on_click</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_custom_code</span><span class="p">)</span>
 
-        <span class="c1"># pick out the actual widget</span>
+        <span class="c1"># 2) Wrap them in a container we&#39;ll show/hide</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code_container</span> <span class="o">=</span> <span class="n">VBox</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;b&gt;Custom Python:&lt;/b&gt;&quot;</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">custom_code</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">run_code_button</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="s2">&quot;block&quot;</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="s2">&quot;6px&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 3) Build your two toggle buttons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span> <span class="o">=</span> <span class="n">ToggleButton</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide Log&quot;</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Show/hide log&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_output</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">toggle_code_button</span> <span class="o">=</span> <span class="n">ToggleButton</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide Code&quot;</span><span class="p">,</span>
+            <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;code&quot;</span><span class="p">,</span>
+            <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Show/hide Python shell&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toggle_code_button</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggle_code</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 4) Put the toggles side‐by‐side</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toggle_row</span> <span class="o">=</span> <span class="n">HBox</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggle_code_button</span><span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 5) Grab your map widget</span>
         <span class="n">map_widget</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">,</span> <span class="s2">&quot;map&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span>
 
-        <span class="c1"># 7) Build the authoring UI, starting with the map</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span>
-            <span class="n">map_widget</span><span class="p">,</span>   <span class="c1"># ← show the map in editor mode</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">scene_controls</span><span class="p">,</span>
-            <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_chrono</span><span class="p">]),</span>
-            <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">]),</span>
-            <span class="c1"># compact entry row</span>
-            <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">],</span>
-                        <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">)),</span>
-            <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_vis</span><span class="p">]),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
-        <span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">))</span>
+        <span class="c1"># 6) Finally build the authoring UI in one shot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span> <span class="o">=</span> <span class="n">VBox</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">map_widget</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scene_controls</span><span class="p">,</span>
+                <span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">order_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_chrono</span><span class="p">]),</span>
+                <span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="p">]),</span>
+                <span class="n">HBox</span><span class="p">(</span>
+                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">],</span>
+                    <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_vis</span><span class="p">]),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">toggle_row</span><span class="p">,</span>  <span class="c1"># both toggles here</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">code_container</span><span class="p">,</span>  <span class="c1"># code editor below</span>
+            <span class="p">],</span>
+            <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">main_container</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">VBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span><span class="p">])</span>
+        <span class="c1"># 7) Wrap into your main container</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">main_container</span> <span class="o">=</span> <span class="n">VBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span><span class="p">])</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span>
@@ -1342,27 +1406,52 @@ SceneBuilder        </code>
         <span class="c1"># 1) Read metadata</span>
         <span class="n">scene_title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;Scene </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">scene_order</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order_input</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_code</span><span class="o">.</span><span class="n">value</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
 
-        <span class="c1"># 2) Build the Scene</span>
+        <span class="c1"># 2) Prepare the layer list (copy of what’s been added so far)</span>
+        <span class="n">layers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># 3) If the user has drawn any ROIs, include them as GeoJSON</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;drawn_features&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">drawn_features</span><span class="p">:</span>
+            <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;geojson&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;FeatureCollection&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;features&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drawn_features</span><span class="p">),</span>
+                    <span class="p">},</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ROIs&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+
+        <span class="c1"># 4) Build the Scene, passing that &#39;layers&#39; var</span>
         <span class="n">scene</span> <span class="o">=</span> <span class="n">Scene</span><span class="p">(</span>
             <span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
             <span class="n">zoom</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="n">caption</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-            <span class="n">layers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
+            <span class="n">layers</span><span class="o">=</span><span class="n">layers</span><span class="p">,</span>
             <span class="n">title</span><span class="o">=</span><span class="n">scene_title</span><span class="p">,</span>
             <span class="n">order</span><span class="o">=</span><span class="n">scene_order</span><span class="p">,</span>
+            <span class="n">basemap</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;basemap_dropdown&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">basemap_dropdown</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">custom_code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="c1"># 3) Append &amp; immediately sort by order</span>
+        <span class="c1"># 5) Append &amp; sort</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scene</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
 
-        <span class="c1"># 4) Refresh selector and clear form</span>
+        <span class="c1"># 6) Refresh UI &amp; clear state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">refresh_scene_list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;drawn_features&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drawn_features</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">order_input</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Saved scene “</span><span class="si">{</span><span class="n">scene_title</span><span class="si">}</span><span class="s2">” at position </span><span class="si">{</span><span class="n">scene_order</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_code</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># 7) Log success</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;✅ Saved scene “</span><span class="si">{</span><span class="n">scene_title</span><span class="si">}</span><span class="s2">” with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span><span class="si">}</span><span class="s2"> layer(s)&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">refresh_scene_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">options</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1381,10 +1470,11 @@ SceneBuilder        </code>
 
         <span class="c1"># 2) Populate the form fields</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">center</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span>               <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">zoom</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="o">.</span><span class="n">value</span>            <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">caption</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">value</span>              <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">title</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">order_input</span><span class="o">.</span><span class="n">value</span>        <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">order</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">zoom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">caption</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">title</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order_input</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">order</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom_code</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">custom_code</span>
 
         <span class="c1"># 3) Reset our internal layer list to this scene’s layers</span>
         <span class="c1">#    (so we don’t accumulate layers from previous edits)</span>
@@ -1403,7 +1493,6 @@ SceneBuilder        </code>
 
         <span class="c1"># 6) Feedback</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded scene </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: “</span><span class="si">{</span><span class="n">scene</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s2">”&quot;</span><span class="p">)</span>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">update_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
         <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene_selector</span><span class="o">.</span><span class="n">index</span>
@@ -1448,7 +1537,7 @@ SceneBuilder        </code>
         <span class="k">if</span> <span class="n">lt</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;geojson&quot;</span><span class="p">,</span> <span class="s2">&quot;raster&quot;</span><span class="p">):</span>
             <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="n">src</span>
+            <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src</span>
 
         <span class="c1"># 4) Extras: bounds for images, EE params for earthengine</span>
         <span class="k">if</span> <span class="n">lt</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
@@ -1462,15 +1551,27 @@ SceneBuilder        </code>
                 <span class="n">vis</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_vis</span><span class="o">.</span><span class="n">value</span> <span class="ow">or</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;❌ Invalid EE vis_params JSON&quot;</span><span class="p">)</span>
-            <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;ee_id&quot;</span><span class="p">]</span>      <span class="o">=</span> <span class="n">ee_id</span>
+            <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;ee_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ee_id</span>
             <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;vis_params&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vis</span>
+        <span class="k">elif</span> <span class="n">lt</span> <span class="o">==</span> <span class="s2">&quot;video&quot;</span><span class="p">:</span>
+            <span class="c1"># require bounds</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;bounds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;❌ Invalid bounds for video&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">lt</span> <span class="o">==</span> <span class="s2">&quot;tile&quot;</span><span class="p">:</span>
+            <span class="c1"># require bounds</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;bounds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;❌ Invalid bounds for tile&quot;</span><span class="p">)</span>
 
         <span class="c1"># 5) Commit into the scene’s layer list</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_def</span><span class="p">)</span>
 
         <span class="c1"># 6) Reset the map view</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">zoom</span>   <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">zoom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span>
 
         <span class="c1"># 7) Clear existing overlays (keep only base)</span>
         <span class="k">for</span> <span class="n">lyr</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">layers</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]:</span>
@@ -1489,12 +1590,11 @@ SceneBuilder        </code>
     <span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Append a message and then render:</span>
-<span class="sd">        • full history if toggle is on</span>
-<span class="sd">        • just the last message if toggle is off</span>
+<span class="sd">        • full history if toggle is ON</span>
+<span class="sd">        • just the last message if toggle is OFF</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># 1) store</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-        <span class="c1"># 2) render based on mode</span>
+        <span class="c1"># Always render (we’re never truly hiding)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_render_log</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1504,17 +1604,19 @@ SceneBuilder        </code>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">toggle_log_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        When the toggle flips:</span>
-<span class="sd">        • if True → switch to full history view</span>
-<span class="sd">        • if False → switch to most-recent-only view</span>
+<span class="sd">        Toggle between full‐history view (True) and</span>
+<span class="sd">        most‐recent‐only view (False).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Always keep the console visible</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">display</span> <span class="o">=</span> <span class="s2">&quot;block&quot;</span>
+
         <span class="k">if</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]:</span>
-            <span class="c1"># now in “full history” mode</span>
+            <span class="c1"># Now in “full history” mode</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Show Recent&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="s2">&quot;eye-slash&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_render_log</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># now in “recent-only” mode</span>
+            <span class="c1"># Now in “recent only” mode</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Show All&quot;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="s2">&quot;eye&quot;</span>
             <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>
@@ -1583,48 +1685,43 @@ SceneBuilder        </code>
 
         <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;tile&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">add_tile</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
-        <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;geojson&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">add_geojson</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
+        <span class="k">if</span> <span class="n">ld</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;geojson&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;data&quot;</span> <span class="ow">in</span> <span class="n">ld</span><span class="p">:</span>
+                <span class="n">layer</span> <span class="o">=</span> <span class="n">GeoJSON</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">ld</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">layer</span> <span class="o">=</span> <span class="n">GeoJSON</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">ld</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">add_image</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span> <span class="n">bounds</span><span class="o">=</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;bounds&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
         <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;raster&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">add_raster</span><span class="p">(</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
         <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;wms&quot;</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">add_wms_layer</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
         <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;video&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">add_video</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">add_video</span><span class="p">(</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s2">&quot;earthengine&quot;</span><span class="p">:</span>
             <span class="kn">import</span><span class="w"> </span><span class="nn">ee</span>
 
             <span class="n">vis</span> <span class="o">=</span> <span class="n">ld</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;vis_params&quot;</span><span class="p">,</span> <span class="p">{})</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">add_earthengine</span><span class="p">(</span><span class="n">ee_id</span><span class="o">=</span><span class="n">ld</span><span class="p">[</span><span class="s2">&quot;ee_id&quot;</span><span class="p">],</span> <span class="n">vis_params</span><span class="o">=</span><span class="n">vis</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
-
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Unknown layer type: </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_enter_present_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># 1) Build the StoryController</span>
-        <span class="n">scenes</span>    <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
+        <span class="n">scenes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
         <span class="n">story_obj</span> <span class="o">=</span> <span class="n">Story</span><span class="p">(</span><span class="n">scenes</span><span class="p">)</span>
-        <span class="n">teller</span>    <span class="o">=</span> <span class="n">StoryController</span><span class="p">(</span><span class="n">story_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span>
+        <span class="n">teller</span> <span class="o">=</span> <span class="n">StoryController</span><span class="p">(</span><span class="n">story_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span>
 
         <span class="c1"># 2) Replace main_container with [edit_button row, presenter]</span>
         <span class="n">header</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">HBox</span><span class="p">(</span>
-            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_button</span><span class="p">],</span>
-            <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">justify_content</span><span class="o">=</span><span class="s2">&quot;flex-end&quot;</span><span class="p">)</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_button</span><span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">widgets</span><span class="o">.</span><span class="n">Layout</span><span class="p">(</span><span class="n">justify_content</span><span class="o">=</span><span class="s2">&quot;flex-end&quot;</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_container</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="n">header</span><span class="p">,</span> <span class="n">teller</span><span class="o">.</span><span class="n">interface</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_exit_present_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># Simply restore the builder UI as the sole child</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_container</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span><span class="p">]</span>
-
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_render_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1634,6 +1731,54 @@ SceneBuilder        </code>
             <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">clear_output</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_history</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_map_center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lon</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Re‑center map when one of the text fields changes.&quot;&quot;&quot;</span>
+        <span class="n">old_lat</span><span class="p">,</span> <span class="n">old_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">center</span>
+        <span class="n">new_lat</span> <span class="o">=</span> <span class="n">lat</span> <span class="k">if</span> <span class="n">lat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">old_lat</span>
+        <span class="n">new_lon</span> <span class="o">=</span> <span class="n">lon</span> <span class="k">if</span> <span class="n">lon</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">old_lon</span>
+        <span class="c1"># This will in turn fire the observer below to update the other widget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="p">(</span><span class="n">new_lat</span><span class="p">,</span> <span class="n">new_lon</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_map_center_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update lat/lon fields when the map is panned.&quot;&quot;&quot;</span>
+        <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]</span>
+        <span class="c1"># avoid feedback loops by only setting if really different</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="n">lat</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">lat</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="n">lon</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">lon</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_on_map_zoom_change</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update zoom slider when the map is zoomed.&quot;&quot;&quot;</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="n">z</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zoom</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">z</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_run_custom_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute user‑entered Python with `map` in scope,</span>
+<span class="sd">        and log success or error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_code</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">local_ns</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;map&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">{},</span> <span class="n">local_ns</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;✅ Custom code executed successfully&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># show only the last line of the traceback</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+
+            <span class="n">tb</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;❌ Error: </span><span class="si">{</span><span class="n">tb</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_toggle_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toggle_code_button</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Hide Code&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">code_container</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">display</span> <span class="o">=</span> <span class="s2">&quot;block&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toggle_code_button</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Show Code&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">code_container</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">display</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
 </code></pre></div>
         </details>
 
@@ -1715,20 +1860,19 @@ SceneBuilder        </code>
     <div class="doc doc-contents ">
 
       <p>Append a message and then render:
-• full history if toggle is on
-• just the last message if toggle is off</p>
+• full history if toggle is ON
+• just the last message if toggle is OFF</p>
 
         <details class="quote">
           <summary>Source code in <code>maeson/gistory.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Append a message and then render:</span>
-<span class="sd">    • full history if toggle is on</span>
-<span class="sd">    • just the last message if toggle is off</span>
+<span class="sd">    • full history if toggle is ON</span>
+<span class="sd">    • just the last message if toggle is OFF</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># 1) store</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">log_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-    <span class="c1"># 2) render based on mode</span>
+    <span class="c1"># Always render (we’re never truly hiding)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_render_log</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1758,25 +1902,26 @@ SceneBuilder        </code>
 
     <div class="doc doc-contents ">
 
-      <p>When the toggle flips:
-• if True → switch to full history view
-• if False → switch to most-recent-only view</p>
+      <p>Toggle between full‐history view (True) and
+most‐recent‐only view (False).</p>
 
         <details class="quote">
           <summary>Source code in <code>maeson/gistory.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">toggle_log_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">change</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    When the toggle flips:</span>
-<span class="sd">    • if True → switch to full history view</span>
-<span class="sd">    • if False → switch to most-recent-only view</span>
+<span class="sd">    Toggle between full‐history view (True) and</span>
+<span class="sd">    most‐recent‐only view (False).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Always keep the console visible</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">display</span> <span class="o">=</span> <span class="s2">&quot;block&quot;</span>
+
     <span class="k">if</span> <span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]:</span>
-        <span class="c1"># now in “full history” mode</span>
+        <span class="c1"># Now in “full history” mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Show Recent&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="s2">&quot;eye-slash&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_render_log</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># now in “recent-only” mode</span>
+        <span class="c1"># Now in “recent only” mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;Show All&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">icon</span> <span class="o">=</span> <span class="s2">&quot;eye&quot;</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>
@@ -1954,12 +2099,10 @@ StoryController        </code>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
                 <span class="n">layer</span> <span class="o">=</span> <span class="n">GeoJSON</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">layer_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;GeoJSON&quot;</span><span class="p">))</span>
-
             <span class="k">elif</span> <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;tile&quot;</span><span class="p">:</span>
                 <span class="n">layer</span> <span class="o">=</span> <span class="n">TileLayer</span><span class="p">(</span>
                     <span class="n">url</span><span class="o">=</span><span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;url&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">layer_def</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Tiles&quot;</span><span class="p">)</span>
                 <span class="p">)</span>
-
             <span class="k">elif</span> <span class="n">layer_def</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;image&quot;</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">bounds</span> <span class="o">=</span> <span class="n">layer_def</span><span class="p">[</span>
@@ -1974,13 +2117,23 @@ StoryController        </code>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading image layer: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="k">continue</span>
-
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported layer type: </span><span class="si">{</span><span class="n">layer_def</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="s2">&quot;custom_code&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">exec</span><span class="p">(</span>
+                    <span class="n">scene</span><span class="o">.</span><span class="n">custom_code</span><span class="p">,</span>
+                    <span class="p">{},</span>  <span class="c1"># no builtins unless you want</span>
+                    <span class="p">{</span><span class="s2">&quot;map&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">},</span>  <span class="c1"># give them `map`</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># swallow or log; you could surface this in the UI</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in scene code: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">next_scene</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">story</span><span class="o">.</span><span class="n">next_scene</span><span class="p">()</span>

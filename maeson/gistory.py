@@ -2,8 +2,32 @@ import json
 import ipywidgets as widgets
 import traceback
 from IPython.display import display, FileLink
-from ipyleaflet import Map, GeoJSON, TileLayer, ImageOverlay, TileLayer, GeoJSON, ImageOverlay, VideoOverlay
-from ipywidgets import Layout, HBox, VBox, Button, Label, Text, IntSlider, FloatText, Dropdown, Output, ToggleButton, jslink, HTML, Textarea
+from ipyleaflet import (
+    Map,
+    GeoJSON,
+    TileLayer,
+    ImageOverlay,
+    TileLayer,
+    GeoJSON,
+    ImageOverlay,
+    VideoOverlay,
+)
+from ipywidgets import (
+    Layout,
+    HBox,
+    VBox,
+    Button,
+    Label,
+    Text,
+    IntSlider,
+    FloatText,
+    Dropdown,
+    Output,
+    ToggleButton,
+    jslink,
+    HTML,
+    Textarea,
+)
 
 
 class Scene:
@@ -16,17 +40,16 @@ class Scene:
         title=None,
         order=1,
         basemap=None,
-        custom_code: str = ""
+        custom_code: str = "",
     ):
-        self.center      = center
-        self.zoom        = zoom
-        self.caption     = caption
-        self.layers      = layers or []
-        self.title       = title
-        self.order       = order
-        self.basemap     = basemap
+        self.center = center
+        self.zoom = zoom
+        self.caption = caption
+        self.layers = layers or []
+        self.title = title
+        self.order = order
+        self.basemap = basemap
         self.custom_code = custom_code  # ← new field
-
 
 
 class Story:
@@ -112,13 +135,13 @@ class StoryController:
 
             self.map.add_layer(layer)
             self.current_layers.append(layer)
-            
+
         if getattr(scene, "custom_code", "").strip():
             try:
                 exec(
                     scene.custom_code,
-                    {},                   # no builtins unless you want
-                    {"map": self.map}     # give them `map`
+                    {},  # no builtins unless you want
+                    {"map": self.map},  # give them `map`
                 )
             except Exception as e:
                 # swallow or log; you could surface this in the UI
@@ -134,6 +157,7 @@ class StoryController:
 
     def display(self):
         from IPython.display import display
+
         display(self.interface)
 
 
@@ -150,18 +174,22 @@ class SceneBuilder:
         self.lon = widgets.FloatText(description="Lon", value=0)
         self.zoom = widgets.IntSlider(description="Zoom", min=1, max=18, value=2)
         self.caption = widgets.Text(description="Caption")
-        
+
         # Zoom slider directly to map.zoom
-        jslink((self.zoom, 'value'), (self.map, 'zoom'))
+        jslink((self.zoom, "value"), (self.map, "zoom"))
 
         # For center, we’ll do observers:
-        self.lat.observe(lambda change: self._update_map_center(lat=change['new']), names='value')
-        self.lon.observe(lambda change: self._update_map_center(lon=change['new']), names='value')
+        self.lat.observe(
+            lambda change: self._update_map_center(lat=change["new"]), names="value"
+        )
+        self.lon.observe(
+            lambda change: self._update_map_center(lon=change["new"]), names="value"
+        )
 
         # Link map to widgets —
 
-        self.map.observe(self._on_map_center_change, names='center')
-        self.map.observe(self._on_map_zoom_change, names='zoom')
+        self.map.observe(self._on_map_center_change, names="center")
+        self.map.observe(self._on_map_zoom_change, names="zoom")
 
         self.title = widgets.Text(description="Title", placeholder="Scene Title")
         self.order_input = widgets.IntText(description="Order", value=1, min=1)
@@ -240,28 +268,31 @@ class SceneBuilder:
             value=True, description="Hide Log", icon="eye-slash"
         )
         self.toggle_log_button.observe(self.toggle_log_output, names="value")
-        
+
         self.custom_code = widgets.Textarea(
             value=(
                 "# Enter Python code here using the variable `map`.\n"
                 "# e.g. map.add_heatmap(data='points.csv', latitude='lat', longitude='lon')"
             ),
             placeholder="Write Python snippet…",
-            layout=Layout(width="100%", height="150px")
+            layout=Layout(width="100%", height="150px"),
         )
         self.run_code_button = widgets.Button(
             description="Run Code",
             button_style="info",
-            tooltip="Execute the code above"
+            tooltip="Execute the code above",
         )
         self.run_code_button.on_click(self._run_custom_code)
 
         # 2) Wrap them in a container we'll show/hide
-        self.code_container = VBox([
-            HTML("<b>Custom Python:</b>"),
-            self.custom_code,
-            self.run_code_button,
-        ], layout=Layout(display="block", gap="6px"))
+        self.code_container = VBox(
+            [
+                HTML("<b>Custom Python:</b>"),
+                self.custom_code,
+                self.run_code_button,
+            ],
+            layout=Layout(display="block", gap="6px"),
+        )
 
         # 3) Build your two toggle buttons
         self.toggle_log_button = ToggleButton(
@@ -270,35 +301,42 @@ class SceneBuilder:
         self.toggle_log_button.observe(self.toggle_log_output, names="value")
 
         self.toggle_code_button = ToggleButton(
-            value=True, description="Hide Code", icon="code", tooltip="Show/hide Python shell"
+            value=True,
+            description="Hide Code",
+            icon="code",
+            tooltip="Show/hide Python shell",
         )
         self.toggle_code_button.observe(self._toggle_code, names="value")
 
         # 4) Put the toggles side‐by‐side
         self.toggle_row = HBox(
-            [self.toggle_log_button, self.toggle_code_button],
-            layout=Layout(gap="10px")
+            [self.toggle_log_button, self.toggle_code_button], layout=Layout(gap="10px")
         )
 
         # 5) Grab your map widget
         map_widget = getattr(self.map, "map", self.map)
 
         # 6) Finally build the authoring UI in one shot
-        self.builder_ui = VBox([
-            map_widget,
-            self.scene_controls,
-            HBox([self.title, self.order_input, self.sort_chrono]),
-            HBox([self.lat, self.lon, self.zoom]),
-            HBox([self.layer_src, self.caption, self.bounds], layout=Layout(gap="10px")),
-            HBox([self.ee_id, self.ee_vis]),
-            self.toggle_row,     # both toggles here
-            self.output,
-            self.code_container, # code editor below
-        ], layout=Layout(gap="10px"))
+        self.builder_ui = VBox(
+            [
+                map_widget,
+                self.scene_controls,
+                HBox([self.title, self.order_input, self.sort_chrono]),
+                HBox([self.lat, self.lon, self.zoom]),
+                HBox(
+                    [self.layer_src, self.caption, self.bounds],
+                    layout=Layout(gap="10px"),
+                ),
+                HBox([self.ee_id, self.ee_vis]),
+                self.toggle_row,  # both toggles here
+                self.output,
+                self.code_container,  # code editor below
+            ],
+            layout=Layout(gap="10px"),
+        )
 
         # 7) Wrap into your main container
-        self.main_container = VBox([ self.builder_ui ])
-
+        self.main_container = VBox([self.builder_ui])
 
     def display(self):
         from IPython.display import display
@@ -352,32 +390,35 @@ class SceneBuilder:
         # 1) Read metadata
         scene_title = self.title.value.strip() or f"Scene {len(self.story)+1}"
         scene_order = self.order_input.value
-        code        = self.custom_code.value or ""
+        code = self.custom_code.value or ""
 
         # 2) Prepare the layer list (copy of what’s been added so far)
         layers = self.layers.copy()
 
         # 3) If the user has drawn any ROIs, include them as GeoJSON
         if hasattr(self, "drawn_features") and self.drawn_features:
-            layers.append({
-                "type": "geojson",
-                "data": {
-                    "type": "FeatureCollection",
-                    "features": list(self.drawn_features)
-                },
-                "name": "ROIs"
-            })
+            layers.append(
+                {
+                    "type": "geojson",
+                    "data": {
+                        "type": "FeatureCollection",
+                        "features": list(self.drawn_features),
+                    },
+                    "name": "ROIs",
+                }
+            )
 
         # 4) Build the Scene, passing that 'layers' var
         scene = Scene(
-            center      = (self.lat.value, self.lon.value),
-            zoom        = self.zoom.value,
-            caption     = self.caption.value,
-            layers      = layers,
-            title       = scene_title,
-            order       = scene_order,
-            basemap     = getattr(self, "basemap_dropdown", None) and self.basemap_dropdown.value,
-            custom_code = code
+            center=(self.lat.value, self.lon.value),
+            zoom=self.zoom.value,
+            caption=self.caption.value,
+            layers=layers,
+            title=scene_title,
+            order=scene_order,
+            basemap=getattr(self, "basemap_dropdown", None)
+            and self.basemap_dropdown.value,
+            custom_code=code,
         )
 
         # 5) Append & sort
@@ -389,13 +430,12 @@ class SceneBuilder:
         self.layers.clear()
         if hasattr(self, "drawn_features"):
             self.drawn_features.clear()
-        self.title.value       = ""
+        self.title.value = ""
         self.order_input.value = len(self.story) + 1
         self.custom_code.value = ""
 
         # 7) Log success
         self.log(f"✅ Saved scene “{scene_title}” with {len(layers)} layer(s)")
-
 
     def refresh_scene_list(self):
         options = []
@@ -414,12 +454,11 @@ class SceneBuilder:
 
         # 2) Populate the form fields
         self.lat.value, self.lon.value = scene.center
-        self.zoom.value               = scene.zoom
-        self.caption.value            = scene.caption
-        self.title.value              = scene.title or ""
-        self.order_input.value        = scene.order
+        self.zoom.value = scene.zoom
+        self.caption.value = scene.caption
+        self.title.value = scene.title or ""
+        self.order_input.value = scene.order
         self.custom_code.value = scene.custom_code
-
 
         # 3) Reset our internal layer list to this scene’s layers
         #    (so we don’t accumulate layers from previous edits)
@@ -482,7 +521,7 @@ class SceneBuilder:
         if lt in ("geojson", "raster"):
             layer_def["path"] = src
         else:
-            layer_def["url"]  = src
+            layer_def["url"] = src
 
         # 4) Extras: bounds for images, EE params for earthengine
         if lt == "image":
@@ -496,7 +535,7 @@ class SceneBuilder:
                 vis = json.loads(self.ee_vis.value or "{}")
             except:
                 return self.log("❌ Invalid EE vis_params JSON")
-            layer_def["ee_id"]      = ee_id
+            layer_def["ee_id"] = ee_id
             layer_def["vis_params"] = vis
         elif lt == "video":
             # require bounds
@@ -510,13 +549,13 @@ class SceneBuilder:
                 layer_def["bounds"] = eval(self.bounds.value)
             except:
                 return self.log("❌ Invalid bounds for tile")
-            
+
         # 5) Commit into the scene’s layer list
         self.layers.append(layer_def)
 
         # 6) Reset the map view
         self.map.center = (self.lat.value, self.lon.value)
-        self.map.zoom   = self.zoom.value
+        self.map.zoom = self.zoom.value
 
         # 7) Clear existing overlays (keep only base)
         for lyr in list(self.map.layers)[1:]:
@@ -535,7 +574,7 @@ class SceneBuilder:
     def log(self, message):
         """
         Append a message and then render:
-        • full history if toggle is ON  
+        • full history if toggle is ON
         • just the last message if toggle is OFF
         """
         self.log_history.append(message)
@@ -549,7 +588,7 @@ class SceneBuilder:
 
     def toggle_log_output(self, change):
         """
-        Toggle between full‐history view (True) and 
+        Toggle between full‐history view (True) and
         most‐recent‐only view (False).
         """
         # Always keep the console visible
@@ -646,6 +685,7 @@ class SceneBuilder:
             self.map.add_video(ld["path"], name=name)
         elif t == "earthengine":
             import ee
+
             vis = ld.get("vis_params", {})
             self.map.add_earthengine(ee_id=ld["ee_id"], vis_params=vis, name=name)
         else:
@@ -653,14 +693,13 @@ class SceneBuilder:
 
     def _enter_present_mode(self, _=None):
         # 1) Build the StoryController
-        scenes    = sorted(self.story, key=lambda s: s.order)
+        scenes = sorted(self.story, key=lambda s: s.order)
         story_obj = Story(scenes)
-        teller    = StoryController(story_obj, self.map)
+        teller = StoryController(story_obj, self.map)
 
         # 2) Replace main_container with [edit_button row, presenter]
         header = widgets.HBox(
-            [self.edit_button],
-            layout=widgets.Layout(justify_content="flex-end")
+            [self.edit_button], layout=widgets.Layout(justify_content="flex-end")
         )
         self.main_container.children = [header, teller.interface]
 
@@ -676,7 +715,7 @@ class SceneBuilder:
             self.output.clear_output(wait=True)
             for msg in self.log_history:
                 print(msg)
-                
+
     def _update_map_center(self, lat=None, lon=None):
         """Re‑center map when one of the text fields changes."""
         old_lat, old_lon = self.map.center
@@ -687,7 +726,7 @@ class SceneBuilder:
 
     def _on_map_center_change(self, change):
         """Update lat/lon fields when the map is panned."""
-        lat, lon = change['new']
+        lat, lon = change["new"]
         # avoid feedback loops by only setting if really different
         if self.lat.value != lat:
             self.lat.value = lat
@@ -696,10 +735,10 @@ class SceneBuilder:
 
     def _on_map_zoom_change(self, change):
         """Update zoom slider when the map is zoomed."""
-        z = change['new']
+        z = change["new"]
         if self.zoom.value != z:
             self.zoom.value = z
-            
+
     def _run_custom_code(self, _):
         """
         Execute user‑entered Python with `map` in scope,
@@ -713,9 +752,10 @@ class SceneBuilder:
         except Exception as e:
             # show only the last line of the traceback
             import traceback
+
             tb = traceback.format_exc().splitlines()[-1]
             self.log(f"❌ Error: {tb}")
-            
+
     def _toggle_code(self, change):
         if change["new"]:
             self.toggle_code_button.description = "Hide Code"
@@ -723,7 +763,8 @@ class SceneBuilder:
         else:
             self.toggle_code_button.description = "Show Code"
             self.code_container.layout.display = "none"
-                
+
+
 def detect_layer_type(path: str) -> str:
     p = path.lower()
     if p.startswith("projects/") or (p.count("/") >= 2 and not p.startswith("http")):

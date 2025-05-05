@@ -1202,7 +1202,7 @@ SceneBuilder        </code>
             <span class="k">lambda</span> <span class="n">change</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_map_center</span><span class="p">(</span><span class="n">lon</span><span class="o">=</span><span class="n">change</span><span class="p">[</span><span class="s2">&quot;new&quot;</span><span class="p">]),</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span>
         <span class="p">)</span>
 
-        <span class="c1"># Link map to widgets —</span>
+        <span class="c1"># Link map to widgets</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_map_center_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;center&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_on_map_zoom_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;zoom&quot;</span><span class="p">)</span>
@@ -1285,6 +1285,7 @@ SceneBuilder        </code>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_output</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
 
+        <span class="c1"># Custom code editor widgets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">custom_code</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Textarea</span><span class="p">(</span>
             <span class="n">value</span><span class="o">=</span><span class="p">(</span>
                 <span class="s2">&quot;# Enter Python code here using the variable `map`.</span><span class="se">\n</span><span class="s2">&quot;</span>
@@ -1299,8 +1300,6 @@ SceneBuilder        </code>
             <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Execute the code above&quot;</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run_code_button</span><span class="o">.</span><span class="n">on_click</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_run_custom_code</span><span class="p">)</span>
-
-        <span class="c1"># 2) Wrap them in a container we&#39;ll show/hide</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">code_container</span> <span class="o">=</span> <span class="n">VBox</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&lt;b&gt;Custom Python:&lt;/b&gt;&quot;</span><span class="p">),</span>
@@ -1310,12 +1309,11 @@ SceneBuilder        </code>
             <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">display</span><span class="o">=</span><span class="s2">&quot;block&quot;</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="s2">&quot;6px&quot;</span><span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="c1"># 3) Build your two toggle buttons</span>
+        <span class="c1"># Toggle buttons</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span> <span class="o">=</span> <span class="n">ToggleButton</span><span class="p">(</span>
             <span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide Log&quot;</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">,</span> <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Show/hide log&quot;</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_output</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_code_button</span> <span class="o">=</span> <span class="n">ToggleButton</span><span class="p">(</span>
             <span class="n">value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Hide Code&quot;</span><span class="p">,</span>
@@ -1324,15 +1322,14 @@ SceneBuilder        </code>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_code_button</span><span class="o">.</span><span class="n">observe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggle_code</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">)</span>
 
-        <span class="c1"># 4) Put the toggles side‐by‐side</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">toggle_row</span> <span class="o">=</span> <span class="n">HBox</span><span class="p">(</span>
             <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">toggle_log_button</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggle_code_button</span><span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="c1"># 5) Grab your map widget</span>
+        <span class="c1"># Map widget</span>
         <span class="n">map_widget</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">,</span> <span class="s2">&quot;map&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">)</span>
 
-        <span class="c1"># 6) Finally build the authoring UI in one shot</span>
+        <span class="c1"># Authoring UI</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span> <span class="o">=</span> <span class="n">VBox</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="n">map_widget</span><span class="p">,</span>
@@ -1343,7 +1340,6 @@ SceneBuilder        </code>
                     <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">],</span>
                     <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">),</span>
                 <span class="p">),</span>
-                <span class="n">HBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">ee_id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ee_vis</span><span class="p">]),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">toggle_row</span><span class="p">,</span>  <span class="c1"># both toggles here</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">output</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">code_container</span><span class="p">,</span>  <span class="c1"># code editor below</span>
@@ -1351,7 +1347,7 @@ SceneBuilder        </code>
             <span class="n">layout</span><span class="o">=</span><span class="n">Layout</span><span class="p">(</span><span class="n">gap</span><span class="o">=</span><span class="s2">&quot;10px&quot;</span><span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="c1"># 7) Wrap into your main container</span>
+        <span class="c1"># 7) Main container</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main_container</span> <span class="o">=</span> <span class="n">VBox</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">builder_ui</span><span class="p">])</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

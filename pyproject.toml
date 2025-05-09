@@ -14,7 +14,7 @@ authors = [
 ]
 classifiers = [
     "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",  
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: MIT License",
     "Natural Language :: English",
     "Programming Language :: Python :: 3.8",
@@ -22,18 +22,18 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Topic :: Scientific/Engineering :: GIS",  
+    "Topic :: Scientific/Engineering :: GIS",
 ]
-keywords = ["geospatial", "raster", "point-cloud", "gis"]  
+keywords = ["geospatial", "raster", "point-cloud", "gis"]
 
 # Define dependencies directly instead of dynamically
 dependencies = [
-    "geopandas>=0.12.0",  
-    "numpy>=1.23.0",     
-    "shapely>=2.0.0",   
-    "pandas>=1.5.0",     
-    "matplotlib>=3.6.0", 
-    "rasterio>=1.4.0",   
+    "geopandas>=0.12.0",
+    "numpy>=1.23.0",
+    "shapely>=2.0.0",
+    "pandas>=1.5.0",
+    "matplotlib>=3.6.0",
+    "rasterio>=1.4.0",
 ]
 
 [project.entry-points."console_scripts"]
@@ -42,20 +42,20 @@ maeson = "maeson.cli:main"
 [project.optional-dependencies]
 # Group optional dependencies logically
 extra = [
-    "scipy>=1.9.0",   
-    "rtree>=0.9.0",      
+    "scipy>=1.9.0",
+    "rtree>=0.9.0",
 ]
 
 docs = [
-    "sphinx>=5.0.0",     
-    "sphinx-rtd-theme>=1.0.0", 
+    "sphinx>=5.0.0",
+    "sphinx-rtd-theme>=1.0.0",
 ]
 
 test = [
-    "pytest>=7.0.0",     
-    "pytest-cov>=3.0.0",  
-    "black>=22.0.0",      
-    "flake8>=5.0.0",      
+    "pytest>=7.0.0",
+    "pytest-cov>=3.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
 ]
 
 # Combine all optional dependencies
@@ -69,7 +69,7 @@ all = [
 include = ["maeson*"]
 exclude = ["docs*"]
 
-[tool.setuptools.package-data]  
+[tool.setuptools.package-data]
 maeson = ["notebooks/*.ipynb", "notebooks/data/*"]
 
 [tool.distutils.bdist_wheel]
@@ -98,5 +98,5 @@ max-line-length = 88
 
 [project.urls]
 Homepage = "https://github.com/dzfinch/maeson"
-Repository = "https://github.com/dzfinch/maeson"  
-Issues = "https://github.com/dzfinch/maeson/issues"  
+Repository = "https://github.com/dzfinch/maeson"
+Issues = "https://github.com/dzfinch/maeson/issues"

@@ -1,5 +1,9 @@
 """Main module."""
 
+import os
+import tempfile
+import requests
+import rasterio
 import ipyleaflet
 import ipywidgets
 import folium
@@ -7,6 +11,7 @@ import rasterio
 import localtileserver
 import ee
 import geemap
+from localtileserver import TileClient, get_leaflet_tile_layer
 from ipywidgets import widgets, Dropdown, Button, VBox
 from ipyleaflet import (
     WidgetControl,
@@ -31,7 +36,7 @@ except ImportError:
 
 class Map(Leafmap):
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault("toolbar_control", False)
+        kwargs.setdefault("toolbar_control", True)
         kwargs.setdefault("layer_control", True)
         super().__init__(*args, **kwargs)
 
@@ -139,40 +144,93 @@ class Map(Leafmap):
         vector_layer = ipyleaflet.GeoJSON(data=vector, **kwargs)
         self.add(vector_layer)
 
-    def add_raster(self, filepath, name=None, colormap="greys", opacity=1, **kwargs):
+    def add_raster(
+        self,
+        filepath: str,
+        name: str = None,
+        colormap="greys",
+        opacity: float = 1.0,
+        zoom_to_layer: bool = True,
+        **kwargs,
+    ):
         """
-        Add a raster (COG) layer to the map.
+        Add a raster (COG) layer to the map and return it.
 
-        Parameters:
-        filepath (str): Path or URL to the cloud-optimized GeoTIFF (COG).
-        name (str, optional): Display name for the layer.
-        colormap (dict or str, optional): A colormap dictionary or a string identifier.
-        opacity (float, optional): Transparency level (default is 1 for fully opaque).
-        **kwargs: Additional keyword arguments to pass to the tile layer generator.
+        Parameters
+        ----------
+        filepath : str
+            URL or local path to a Cloud‑Optimized GeoTIFF.
+        name : str, optional
+            Display name for the layer. Defaults to filename.
+        colormap : dict or str, optional
+            A colormap dictionary or registered name (e.g. "viridis").
+        opacity : float, optional
+            0.0 (transparent) – 1.0 (opaque).
+        zoom_to_layer : bool, optional
+            If True, fit the map to the raster’s bounds after adding.
+        **kwargs : dict
+            Extra kwargs passed to `get_leaflet_tile_layer`.
+
+        Returns
+        -------
+        ipyleaflet.Layer
+            The tile layer that was added.
         """
-        import rasterio
-        from localtileserver import TileClient, get_leaflet_tile_layer
+        # 1) If it’s a GitHub “release/download” URL, pull it down locally
+        if (
+            filepath.startswith("https://github.com/")
+            and "/releases/download/" in filepath
+        ):
+            fname = os.path.basename(filepath)
+            tmp_dir = tempfile.gettempdir()
+            local_fp = os.path.join(tmp_dir, fname)
+            if not os.path.exists(local_fp):
+                resp = requests.get(filepath, stream=True)
+                resp.raise_for_status()
+                with open(local_fp, "wb") as f:
+                    for chunk in resp.iter_content(1024 * 1024):
+                        f.write(chunk)
+            filepath = local_fp
 
-        # Open the raster with rasterio to inspect metadata.
+        # 2) Inspect with rasterio: get colormap if needed + bounds
         with rasterio.open(filepath) as src:
-            # If no colormap is provided (i.e., None), try extracting it from the raster's first band.
             if colormap is None:
                 try:
                     colormap = src.colormap(1)
                 except Exception:
-                    # Leave colormap unchanged if extraction fails.
                     colormap = "greys"
+            left, bottom, right, top = src.bounds
 
-        # Create the tile client from the provided file path.
+        # 3) Spin up the tile server + leaflet layer
         client = TileClient(filepath)
-
-        # Generate the leaflet tile layer using the provided parameters.
+        layer_name = name or os.path.basename(filepath)
         tile_layer = get_leaflet_tile_layer(
-            client, name=name, colormap=colormap, opacity=opacity, **kwargs
+            client, name=layer_name, colormap=colormap, opacity=opacity, **kwargs
         )
 
-        # Add the layer to the viewer and update the center and zoom based on the raster metadata.
-        self.add(tile_layer)
+        # 4) Add to the map
+        try:
+            self.add_layer(tile_layer)
+        except AttributeError:
+            # fallback if your class uses .add() instead
+            self.add(tile_layer)
+
+        # 5) Ensure it has a valid name
+        if hasattr(tile_layer, "name") and not tile_layer.name:
+            tile_layer.name = layer_name
+
+        # 6) Auto‑zoom if requested
+        if zoom_to_layer:
+            sw = (bottom, left)
+            ne = (top, right)
+            try:
+                self.fit_bounds([sw, ne])
+            except Exception:
+                # if you're using leafmap you could also call:
+                # self.zoom_to_layer(tile_layer)
+                pass
+
+        return tile_layer
 
     def add_image(self, url, bounds, opacity=1, **kwargs):
         """

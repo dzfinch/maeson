@@ -1,52 +1,52 @@
-# Welcome to maeson
-
+# Maeson: Making Awesome Earth Science presentatiONs
 
 [![image](https://img.shields.io/pypi/v/maeson.svg)](https://pypi.python.org/pypi/maeson)
 
+Welcome to **Maeson**, the all-in-one geospatial toolkit for creating, editing, and sharing dynamic Earth science narratives directly within your Jupyter environment. Maeson simplifies complex geospatial workflows by uniting data processing, visualization, and interactive storytelling into a single, cohesive package.
 
-**Geospatial software for raster and point cloud processing.**
+## Key Features
 
-Sure! Here's the `homepage.md` in proper Markdown format:
+* 🚀 **Rapid Scene Creation**: Define map extents, set zoom levels, and add diverse layers (GeoJSON, raster, tile, WMS, imagery, video, and Earth Engine) with just a few lines of Python.
+* 🔄 **Live Previews**: Instantly render and update layers in-place. Tweak layer parameters or custom scripts and see changes reflected on the map in real time.
+* 🔧 **Custom Code Integration**: Write arbitrary Python snippets (e.g., Earth Engine calls, heatmaps, analytics) in the embedded code editor, execute them on your map, and save them alongside each scene.
+* 📑 **Structured Storytelling**: Organize multiple scenes into an ordered sequence, annotate with titles and metadata, and export your narrative as JSON for later reuse or publication.
+* 📊 **Presentation Mode**: Switch seamlessly from authoring to playback. Advance through your scenes with Next/Back controls, focusing your audience on the evolving map story.
+* 🎨 **Interactive Bounds Editing**: Adjust image and video overlays by dragging or via sliders—no need to recode bounds manually.
 
-# Welcome to MAESon 🌍🤖
+## Getting Started
 
-**MAESon (Machine Learning and Artificial Intelligence for Earth Science)** is an open-source geospatial software package that harnesses the power of AI and machine learning to analyze Earth science data. Whether you're working with remote sensing imagery, hydrological models, or ecological datasets, MAESon provides cutting-edge tools to extract meaningful insights.
-
-## Why MAESon? 🚀
-- **AI-Powered Geospatial Analysis**: Integrates machine learning models for classification, prediction, and feature extraction.
-- **Remote Sensing Support**: Works with multispectral, hyperspectral, and LiDAR data.
-- **Hydrological & Ecological Tools**: Analyze land cover, water bodies, and vegetation changes.
-- **Seamless GIS Integration**: Compatible with GDAL, QGIS, and other geospatial tools.
-- **Open-Source & Community-Driven**: Built for researchers, by researchers.
-
-## Getting Started 💡
-Ready to dive in? Follow these steps to set up MAESon on your machine:
-
-### 1. Install MAESon
-```bash
-pip install maeson
-```
-
-### 2. Load Your Data
 ```python
 import maeson
-data = maeson.load_raster("path/to/your/data.tif")
+from maeson import Map, StoryBuilder, StoryTeller
+
+# 1. Initialize your map
+m = Map(center=(37.77, -122.42), zoom=10)
+
+# 2. Launch the story builder
+builder = StoryBuilder(m)
+builder.display()
+
+# 3. Add layers, set titles, and preview interactively
+# 4. Save scenes and switch to presentation mode
 ```
 
-### 3. Run Analysis
-```python
-result = maeson.process_raster(data, model="random_forest")
-```
+## Example Workflow
 
-## Learn More 📚
-- **[Installation Guide](docs/installation.md)** – Step-by-step setup instructions.
-- **[User Guide](docs/user-guide.md)** – Explore core functionalities and examples.
-- **[API Reference](docs/api.md)** – Detailed documentation on available methods.
-- **[Contributing](docs/contributing.md)** – Join the MAESon development community!
+1. **Load data**: Use `m.add_geojson()`, `m.add_raster()`, or custom Earth Engine calls in the code editor.
+2. **Preview**: Click Preview to render layers and auto-zoom to extents.
+3. **Save**: Title and save your scene—Maeson persists both the map state and any custom code.
+4. **Copy & Clear**: Duplicate or clear layers between scenes for iterative storytelling.
+5. **Present**: Hit Present to enter an uncluttered playback interface.
 
-## Stay Connected 💬
-- **GitHub**: [github.com/yourusername/MAESon](https://github.com/yourusername/MAESon)
-- **Discussions & Issues**: Submit questions, feature requests, or bug reports.
-- **Community Contributions**: Help improve MAESon by contributing code, documentation, or use cases.
+## Extensibility
 
-🚀 **Get started today and bring AI-powered insights to your geospatial data!**
+Maeson’s modular design lets you:
+
+* Hook into additional mapping libraries (e.g., Leafmap, MapLibre)
+* Integrate new layer types or data sources
+* Customize UI components to match your workflow
+
+---
+
+> **Maeson**: Making Awesome Earth Science Presentations — your one-stop solution for geospatial storytelling.
+

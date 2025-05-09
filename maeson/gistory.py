@@ -13,12 +13,24 @@ from ipyleaflet import (
     ImageOverlay,
     VideoOverlay,
     DrawControl,
-    Rectangle
+    Rectangle,
 )
 from ipywidgets import (
-    HBox, VBox, Button, ToggleButton, Textarea,
-    FloatText, FloatSlider, IntSlider, Text, IntText, Checkbox,
-    Output, Layout, HTML, jslink
+    HBox,
+    VBox,
+    Button,
+    ToggleButton,
+    Textarea,
+    FloatText,
+    FloatSlider,
+    IntSlider,
+    Text,
+    IntText,
+    Checkbox,
+    Output,
+    Layout,
+    HTML,
+    jslink,
 )
 
 
@@ -65,7 +77,7 @@ class Story:
 
 
 class StoryController:
-    def __init__(self, story, map_obj:Map):
+    def __init__(self, story, map_obj: Map):
         """
         Connects a Story object to a map and widget-based UI.
         """
@@ -79,7 +91,7 @@ class StoryController:
         self.back_button.on_click(self._previous_scene)
 
         self.controls = widgets.HBox([self.back_button, self.next_button])
-        self.interface = widgets.VBox([self.map,self.controls])
+        self.interface = widgets.VBox([self.map, self.controls])
 
         self._update_scene()
 
@@ -87,7 +99,7 @@ class StoryController:
         scene = self.story._current_scene()
         # 1) Reset view
         self.map.center = scene.center
-        self.map.zoom   = scene.zoom
+        self.map.zoom = scene.zoom
 
         # 2) Clear out any previous overlays
         self._clear_overlays()
@@ -95,7 +107,7 @@ class StoryController:
 
         # 3) Re‑add each layer using your Map methods
         for ld in scene.layers:
-            t    = ld["type"]
+            t = ld["type"]
             name = ld.get("name")
 
             try:
@@ -113,18 +125,20 @@ class StoryController:
                     layer = self.map.add_image(
                         url=ld["path"],
                         bounds=tuple(tuple(c) for c in ld["bounds"]),
-                        name=name
+                        name=name,
                     )
 
                 elif t == "video":
                     layer = self.map.add_video(
                         url=ld["path"],
                         bounds=tuple(tuple(c) for c in ld["bounds"]),
-                        name=name
+                        name=name,
                     )
 
                 elif t == "raster":
-                    layer = self.map.add_raster(ld["path"], name=name, zoom_to_layer=False)
+                    layer = self.map.add_raster(
+                        ld["path"], name=name, zoom_to_layer=False
+                    )
 
                 elif t == "wms":
                     layer = self.map.add_wms_layer(url=ld["url"], name=name)
@@ -132,9 +146,9 @@ class StoryController:
                 elif t == "earthengine":
                     # your Map.add_earthengine takes ee_object + vis_params
                     layer = self.map.add_earthengine(
-                        ee_object = ld["ee_id"],
+                        ee_object=ld["ee_id"],
                         vis_params=ld.get("vis_params", {}),
-                        name      = name
+                        name=name,
                     )
 
                 else:
@@ -152,7 +166,7 @@ class StoryController:
                 exec(scene.custom_code, {}, {"map": self.map})
             except Exception as e:
                 print(f"⚠️ Error in scene code: {e}")
-                
+
     def _clear_overlays(self):
         # 1) Remove map overlays
         for lyr in list(self.map.layers)[1:]:
@@ -171,13 +185,14 @@ class StoryController:
 
         display(self.interface)
 
+
 class SceneBuilder:
     def __init__(self, maeson_map: Map):
         # Core state
-        self.map          = maeson_map
-        self.layers       = []   
-        self.story        = []   
-        self.log_history  = []
+        self.map = maeson_map
+        self.layers = []
+        self.story = []
+        self.log_history = []
         self._active_overlay = None
 
         # Wire map events
@@ -193,20 +208,20 @@ class SceneBuilder:
 
         # Assemble final UI
         self._build_main_ui()
-        
+
     def display(self):
         display(self.main_container)
 
     def _initialize_map_observers(self):
         """Watch map center, zoom, and layers for two‑way sync & auto‑zoom."""
         self.map.observe(self._on_map_center_change, names="center")
-        self.map.observe(self._on_map_zoom_change,   names="zoom")
+        self.map.observe(self._on_map_zoom_change, names="zoom")
         self.map.observe(self._on_map_layers_change, names="layers")
 
     def _initialize_map_controls(self):
         """Latitude/Longitude/Zoom widget row + Zoom‑to‑layers button."""
-        self.lat  = FloatText(description="Lat", value=0)
-        self.lon  = FloatText(description="Lon", value=0)
+        self.lat = FloatText(description="Lat", value=0)
+        self.lon = FloatText(description="Lon", value=0)
         self.zoom = IntSlider(description="Zoom", min=1, max=18, value=2)
 
         # Sync zoom slider ←→ map
@@ -217,25 +232,27 @@ class SceneBuilder:
 
         # Zoom‑to‑all‑layers button
         self.zoom_to_layers_button = Button(
-            description="", icon="arrows-alt", tooltip="Zoom to all layers",
-            layout=Layout(width="32px")
+            description="",
+            icon="arrows-alt",
+            tooltip="Zoom to all layers",
+            layout=Layout(width="32px"),
         )
         self.zoom_to_layers_button.on_click(self._zoom_to_layers)
 
         self.coords_controls = HBox(
             [self.lat, self.lon, self.zoom, self.zoom_to_layers_button],
-            layout=Layout(gap="6px")
+            layout=Layout(gap="6px"),
         )
 
     def _initialize_layer_controls(self):
         """Initialize widgets for layer management, including live‐bounds sliders."""
         # 1) URL / path entry
         self.layer_src = Text(description="URL/path")
-        
+
         self._clear_layers_button = Button(
             description="Clear Layers",
             button_style="danger",
-            tooltip="Remove all added layers from map"
+            tooltip="Remove all added layers from map",
         )
         self._clear_layers_button.on_click(self._clear_layers)
 
@@ -244,79 +261,110 @@ class SceneBuilder:
 
         # 3) Four sliders for South, West, North, East
         self.bound_sliders = {
-            'south': FloatSlider(min=-90,  max=90,  step=0.1, description='South'),
-            'west':  FloatSlider(min=-180, max=180, step=0.1, description='West'),
-            'north': FloatSlider(min=-90,  max=90,  step=0.1, description='North'),
-            'east':  FloatSlider(min=-180, max=180, step=0.1, description='East'),
+            "south": FloatSlider(min=-90, max=90, step=0.1, description="South"),
+            "west": FloatSlider(min=-180, max=180, step=0.1, description="West"),
+            "north": FloatSlider(min=-90, max=90, step=0.1, description="North"),
+            "east": FloatSlider(min=-180, max=180, step=0.1, description="East"),
         }
         # Set default values to -30, -30, 30, 30
-        self.bound_sliders['south'].value = -30
-        self.bound_sliders['west'].value  = -30
-        self.bound_sliders['north'].value = 30
-        self.bound_sliders['east'].value  = 30
+        self.bound_sliders["south"].value = -30
+        self.bound_sliders["west"].value = -30
+        self.bound_sliders["north"].value = 30
+        self.bound_sliders["east"].value = 30
 
         # 4) Pack sliders into a hidden VBox
         self.bounds_container = VBox(
             [
-                HBox([self.bound_sliders['south'], self.bound_sliders['west']]),
-                HBox([self.bound_sliders['north'], self.bound_sliders['east']])
+                HBox([self.bound_sliders["south"], self.bound_sliders["west"]]),
+                HBox([self.bound_sliders["north"], self.bound_sliders["east"]]),
             ],
-            layout=Layout(display="none", gap="6px")
+            layout=Layout(display="none", gap="6px"),
         )
 
         # 5) Whenever a slider moves, sync it into the hidden .bounds.value
         def _sync_bounds_to_text(change):
             b = (
-                (self.bound_sliders['south'].value, self.bound_sliders['west'].value),
-                (self.bound_sliders['north'].value, self.bound_sliders['east'].value)
+                (self.bound_sliders["south"].value, self.bound_sliders["west"].value),
+                (self.bound_sliders["north"].value, self.bound_sliders["east"].value),
             )
             self.bounds.value = repr(b)
 
         for slider in self.bound_sliders.values():
-            slider.observe(_sync_bounds_to_text, names='value')
-            slider.observe(self._update_overlay_bounds, names='value')
+            slider.observe(_sync_bounds_to_text, names="value")
+            slider.observe(self._update_overlay_bounds, names="value")
 
         # 6) Show/hide sliders based on URL type
         def _on_src_change(change):
-            url = change['new'].strip().lower()
-            is_img = url.endswith(('.png', '.jpg', '.jpeg', '.gif', '.tiff'))
-            is_vid = url.endswith(('.mp4', '.webm'))
+            url = change["new"].strip().lower()
+            is_img = url.endswith((".png", ".jpg", ".jpeg", ".gif", ".tiff"))
+            is_vid = url.endswith((".mp4", ".webm"))
             if is_img or is_vid:
-                self.bounds_container.layout.display = 'block'
+                self.bounds_container.layout.display = "block"
             else:
-                self.bounds_container.layout.display = 'none'
+                self.bounds_container.layout.display = "none"
 
-        self.layer_src.observe(_on_src_change, names='value')
+        self.layer_src.observe(_on_src_change, names="value")
 
         # 7) Finally, assemble the layer‐controls panel
-        self.layer_controls = VBox([
-            HBox([self.layer_src, self._clear_layers_button], layout=Layout(gap="6px")),
-            self.bounds_container,
-            self.bounds
-        ], layout=Layout(gap="6px"))
-        
+        self.layer_controls = VBox(
+            [
+                HBox(
+                    [self.layer_src, self._clear_layers_button],
+                    layout=Layout(gap="6px"),
+                ),
+                self.bounds_container,
+                self.bounds,
+            ],
+            layout=Layout(gap="6px"),
+        )
+
     def _initialize_scene_controls(self):
         """Title, order, sort toggle and action buttons (Save, Preview, etc.)."""
-        self.title       = Text(description="Title", placeholder="Scene Title")
+        self.title = Text(description="Title", placeholder="Scene Title")
         self.order_input = IntText(description="Order", value=1, min=1)
         self.sort_chrono = Checkbox(description="Sort Chrono", value=False)
         self.org_controls = HBox([self.title, self.order_input, self.sort_chrono])
 
         # Dropdown of saved scenes
         self.scene_selector = widgets.Dropdown(
-            options=[], description="Scenes",
-            layout=Layout(width="250px")
+            options=[], description="Scenes", layout=Layout(width="250px")
         )
         self.scene_selector.observe(self._on_scene_select, names="value")
 
         # Action buttons
-        self.save_button   = self._create_button("💾 Save",   "primary", self._save_scene,      tooltip="Save current scene")
-        self.preview_button= self._create_button("🔍 Preview","info",    self._preview_scene,   tooltip="Visualize scene parameters")
-        self.copy_button   = self._create_button("📋 Copy",   "warning", self._copy_scene,      tooltip="Duplicate current scene")
-        self.delete_button = self._create_button("🗑️ Delete", "danger",  self._delete_scene,    tooltip="Delete current scene")
-        self.export_button = self._create_button("📤 Export", "warning", self._export_story,    tooltip="Export Scenes as Story JSON")
-        self.present_button = self._create_button("▶️ Present","success", self._enter_present_mode, tooltip="Switch to SceneController")
-        self.edit_button = self._create_button("✏️ Edit", "warning", self._exit_present_mode, tooltip="Return to SceneBuilder")
+        self.save_button = self._create_button(
+            "💾 Save", "primary", self._save_scene, tooltip="Save current scene"
+        )
+        self.preview_button = self._create_button(
+            "🔍 Preview",
+            "info",
+            self._preview_scene,
+            tooltip="Visualize scene parameters",
+        )
+        self.copy_button = self._create_button(
+            "📋 Copy", "warning", self._copy_scene, tooltip="Duplicate current scene"
+        )
+        self.delete_button = self._create_button(
+            "🗑️ Delete", "danger", self._delete_scene, tooltip="Delete current scene"
+        )
+        self.export_button = self._create_button(
+            "📤 Export",
+            "warning",
+            self._export_story,
+            tooltip="Export Scenes as Story JSON",
+        )
+        self.present_button = self._create_button(
+            "▶️ Present",
+            "success",
+            self._enter_present_mode,
+            tooltip="Switch to SceneController",
+        )
+        self.edit_button = self._create_button(
+            "✏️ Edit",
+            "warning",
+            self._exit_present_mode,
+            tooltip="Return to SceneBuilder",
+        )
         self.export_button.style.button_color = "#FFD700"
         self.export_button.add_class("export-btn")
 
@@ -330,18 +378,24 @@ class SceneBuilder:
                 self.export_button,
                 self.present_button,
             ],
-            layout=Layout(gap="8px")
+            layout=Layout(gap="8px"),
         )
 
     def _initialize_logging_widgets(self):
         """Output console + toggle button for log visibility."""
-        self.output = Output(layout=Layout(
-            border="1px solid gray",
-            padding="6px", max_height="150px", overflow="auto"
-        ))
+        self.output = Output(
+            layout=Layout(
+                border="1px solid gray",
+                padding="6px",
+                max_height="150px",
+                overflow="auto",
+            )
+        )
         self.toggle_log_button = ToggleButton(
-            value=False, description="Show Log", icon="eye-slash",
-            tooltip="Show/hide log console"
+            value=False,
+            description="Show Log",
+            icon="eye-slash",
+            tooltip="Show/hide log console",
         )
         self.toggle_log_button.observe(self._toggle_log_output, names="value")
         self.output.layout.display = "none"  # start hidden
@@ -350,7 +404,7 @@ class SceneBuilder:
         """Textarea + Run button for custom Python snippets."""
         self.custom_code = Textarea(
             value=(
-"""import ee
+                """import ee
 ee.Initialize()\n
 # Example: add an Earth Engine image to the map
 # map.add_earthengine(
@@ -360,23 +414,24 @@ ee.Initialize()\n
 #)
 """
             ),
-            layout=Layout(width="100%", height="150px")
+            layout=Layout(width="100%", height="150px"),
         )
-        self.code_container  = VBox(
+        self.code_container = VBox(
             [HTML("<b>Custom Python:</b>"), self.custom_code],
-            layout=Layout(display="none", gap="6px")
+            layout=Layout(display="none", gap="6px"),
         )
 
     def _initialize_toggle_buttons(self):
         """Bundle Log + Code toggles into one row."""
         self.toggle_code_button = ToggleButton(
-            value=False, description="Show Code", icon="code",
-            tooltip="Show/hide Python shell"
+            value=False,
+            description="Show Code",
+            icon="code",
+            tooltip="Show/hide Python shell",
         )
         self.toggle_code_button.observe(self._toggle_code, names="value")
         self.toggle_row = HBox(
-            [self.toggle_log_button, self.toggle_code_button],
-            layout=Layout(gap="6px")
+            [self.toggle_log_button, self.toggle_code_button], layout=Layout(gap="6px")
         )
 
     def _build_main_ui(self):
@@ -393,7 +448,7 @@ ee.Initialize()\n
                 self.output,
                 self.code_container,
             ],
-            layout=Layout(gap="10px")
+            layout=Layout(gap="10px"),
         )
         self.main_container = VBox([self.builder_ui])
 
@@ -451,29 +506,32 @@ ee.Initialize()\n
         # 1) Read metadata
         scene_title = self.title.value.strip() or f"Scene {len(self.story)+1}"
         scene_order = self.order_input.value
-        code        = self.custom_code.value or ""
+        code = self.custom_code.value or ""
 
         # 2) Prepare layer list, including drawn ROIs if any
         layers = self.layers.copy()
         if hasattr(self, "drawn_features") and self.drawn_features:
-            layers.append({
-                "type": "geojson",
-                "data": {
-                    "type": "FeatureCollection",
-                    "features": list(self.drawn_features)
-                },
-                "name": "ROIs"
-            })
+            layers.append(
+                {
+                    "type": "geojson",
+                    "data": {
+                        "type": "FeatureCollection",
+                        "features": list(self.drawn_features),
+                    },
+                    "name": "ROIs",
+                }
+            )
 
         # 3) Build a new Scene object
         new_scene = Scene(
-            center      = (self.lat.value, self.lon.value),
-            zoom        = self.zoom.value,
-            layers      = layers,
-            title       = scene_title,
-            order       = scene_order,
-            basemap     = getattr(self, "basemap_dropdown", None) and self.basemap_dropdown.value,
-            custom_code = code
+            center=(self.lat.value, self.lon.value),
+            zoom=self.zoom.value,
+            layers=layers,
+            title=scene_title,
+            order=scene_order,
+            basemap=getattr(self, "basemap_dropdown", None)
+            and self.basemap_dropdown.value,
+            custom_code=code,
         )
 
         # 4) Update in place if title exists, else append
@@ -499,10 +557,10 @@ ee.Initialize()\n
         if hasattr(self, "drawn_features"):
             self.drawn_features.clear()
 
-        self.title.value       = ""
+        self.title.value = ""
         self.order_input.value = len(self.story) + 1
-        self.layer_src.value   = ""
-        self.bounds.value      = ""
+        self.layer_src.value = ""
+        self.bounds.value = ""
         self.custom_code.value = ""
 
         # 8) Log what happened
@@ -542,7 +600,7 @@ ee.Initialize()\n
             if lt in ("geojson", "raster", "wms", "tile", "image", "video"):
                 layer_def["path"] = src
             else:
-                layer_def["url"]  = src
+                layer_def["url"] = src
 
             # bounds for image/video
             if lt in ("image", "video"):
@@ -563,21 +621,21 @@ ee.Initialize()\n
                         self._active_overlay = layer
                         sw, ne = layer.bounds
                         # init sliders
-                        self.bound_sliders['south'].value = sw[0]
-                        self.bound_sliders['west'].value  = sw[1]
-                        self.bound_sliders['north'].value = ne[0]
-                        self.bound_sliders['east'].value  = ne[1]
+                        self.bound_sliders["south"].value = sw[0]
+                        self.bound_sliders["west"].value = sw[1]
+                        self.bound_sliders["north"].value = ne[0]
+                        self.bound_sliders["east"].value = ne[1]
                         self.bounds_container.layout.display = "block"
             except Exception as e:
                 self._log(f"❌ Failed to apply {ld.get('name')}: {e}")
-                
+
         # 7) zoom to all overlays
         if applied:
             self._zoom_to_layers(None)
 
         # 8) final log
         self._log(f"✅ Previewed scene with {len(self.layers)} layer(s)")
-        
+
     def _copy_scene(self, _=None):
         """
         Duplicate the currently selected Scene, insert it immediately after,
@@ -596,18 +654,18 @@ ee.Initialize()\n
                 s.order += 1
 
         # 2) Deep‐copy the layer definitions & custom code
-        new_layers   = copy.deepcopy(original.layers)
-        new_custom   = getattr(original, "custom_code", "")
+        new_layers = copy.deepcopy(original.layers)
+        new_custom = getattr(original, "custom_code", "")
 
         # 3) Build the new Scene
         new_scene = Scene(
-            center      = original.center,
-            zoom        = original.zoom,
-            layers      = new_layers,
-            title       = f"{original.title} - Copy",
-            order       = new_order,
-            basemap     = getattr(original, "basemap", None),
-            custom_code = new_custom
+            center=original.center,
+            zoom=original.zoom,
+            layers=new_layers,
+            title=f"{original.title} - Copy",
+            order=new_order,
+            basemap=getattr(original, "basemap", None),
+            custom_code=new_custom,
         )
 
         # 4) Insert, resort, refresh UI
@@ -616,7 +674,9 @@ ee.Initialize()\n
         self._refresh_scene_list()
 
         # 5) Feedback to the user
-        self._log(f"✅ Copied “{original.title}” to “{new_scene.title}” at position {new_order}")
+        self._log(
+            f"✅ Copied “{original.title}” to “{new_scene.title}” at position {new_order}"
+        )
 
     def _delete_scene(self, _):
         i = self.scene_selector.index
@@ -625,7 +685,7 @@ ee.Initialize()\n
         self.story.pop(i)
         self._refresh_scene_list()
         self._log(f"Deleted scene {i}.")
-        
+
     def _export_story(self, _=None):
         """
         Dump all scenes to story.json and display a download link.
@@ -650,7 +710,7 @@ ee.Initialize()\n
         self._log(f"✅ Story exported to {fn}")
         display(FileLink(fn))
 
-    def _load_scene(self, _=None):        
+    def _load_scene(self, _=None):
         self._clear_layers
         # Figure out which scene is selected
         idx = self.scene_selector.index
@@ -659,15 +719,16 @@ ee.Initialize()\n
         scene = self.story[idx]
 
         # Update your form fields
-        self.title.value       = scene.title or ""
+        self.title.value = scene.title or ""
         self.order_input.value = scene.order
 
         # Reset your builder state
         self.layers = [ld.copy() for ld in scene.layers]
         if hasattr(self, "drawn_features"):
             self.drawn_features = [
-                feat for ld in scene.layers 
-                if ld["type"] == "geojson" and "data" in ld 
+                feat
+                for ld in scene.layers
+                if ld["type"] == "geojson" and "data" in ld
                 for feat in ld["data"]["features"]
             ]
 
@@ -679,7 +740,7 @@ ee.Initialize()\n
                 self._log(f"❌ Failed to load layer {ld.get('name')}: {e}")
 
         self.map.center = scene.center
-        self.map.zoom   = scene.zoom
+        self.map.zoom = scene.zoom
 
         # Give the user feedback
         self._log(f"🔄 Loaded scene “{scene.title}” ({len(self.layers)} layers)")
@@ -698,7 +759,7 @@ ee.Initialize()\n
         self.story[i] = scene
         self._refresh_scene_list()
         self._log(f"Updated scene {i}.")
-        
+
     def _refresh_scene_list(self):
         options = []
         for i, s in enumerate(self.story):
@@ -727,7 +788,7 @@ ee.Initialize()\n
                 self.output.clear_output(wait=True)
                 if self.log_history:
                     print(self.log_history[-1])
-                    
+
     def _render_log(self):
         """
         Clear and print every message in log_history.
@@ -736,7 +797,7 @@ ee.Initialize()\n
             self.output.clear_output(wait=True)
             for msg in self.log_history:
                 print(msg)
-                    
+
     def _log(self, message):
         """
         Append a message and then render:
@@ -751,7 +812,7 @@ ee.Initialize()\n
             with self.output:
                 self.output.clear_output(wait=True)
                 print(self.log_history[-1])
-                
+
     def _toggle_code(self, change):
         if change["new"]:
             self.toggle_code_button.description = "Hide Code"
@@ -771,16 +832,18 @@ ee.Initialize()\n
         def _recording_add_ee(*args, **kwargs):
             layer = real_add_ee(*args, **kwargs)
 
-            ee_obj   = kwargs.get("ee_object") or (args[0] if args else None)
-            vis      = kwargs.get("vis_params", {})
-            name     = kwargs.get("name") or f"EE-{len(self.layers)}"
+            ee_obj = kwargs.get("ee_object") or (args[0] if args else None)
+            vis = kwargs.get("vis_params", {})
+            name = kwargs.get("name") or f"EE-{len(self.layers)}"
 
-            self.layers.append({
-                "type":       "earthengine",
-                "ee_id":      ee_obj,
-                "vis_params": vis,
-                "name":       name
-            })
+            self.layers.append(
+                {
+                    "type": "earthengine",
+                    "ee_id": ee_obj,
+                    "vis_params": vis,
+                    "name": name,
+                }
+            )
             return layer
 
         self.map.add_earthengine = _recording_add_ee
@@ -790,6 +853,7 @@ ee.Initialize()\n
             self._log("✅ Custom code executed")
         except Exception as e:
             import traceback
+
             tb = traceback.format_exc().splitlines()[-1]
             self._log(f"❌ Code error: {tb}")
         finally:
@@ -878,14 +942,13 @@ ee.Initialize()\n
             self.ee_vis.value = json.dumps(layer_def.get("vis_params", {}))
 
     def _enter_present_mode(self, _=None):
-        scenes    = sorted(self.story, key=lambda s: s.order)
+        scenes = sorted(self.story, key=lambda s: s.order)
         story_obj = Story(scenes)
-        teller    = StoryController(story_obj, self.map)
+        teller = StoryController(story_obj, self.map)
 
         # show the Edit button above the presenter interface
         header = widgets.HBox(
-            [self.edit_button],
-            layout=widgets.Layout(justify_content="flex-end")
+            [self.edit_button], layout=widgets.Layout(justify_content="flex-end")
         )
         self.main_container.children = [header, teller.interface]
 
@@ -915,10 +978,10 @@ ee.Initialize()\n
         z = change["new"]
         if self.zoom.value != z:
             self.zoom.value = z
-        
+
     def _on_map_layers_change(self, change):
         """
-        Whenever map.layers grows, schedule a zoom‑to‑layers on the 
+        Whenever map.layers grows, schedule a zoom‑to‑layers on the
         notebook’s asyncio loop (so fit_bounds works correctly).
         """
         old = change["old"]
@@ -934,7 +997,7 @@ ee.Initialize()\n
         except RuntimeError:
             # if there’s no running loop, just fire immediately
             self._zoom_to_layers(None)
-            
+
     def _enable_bounds_editing(self, overlay):
         """
         Let the user drag/resize a rectangle on the map to reset
@@ -947,8 +1010,11 @@ ee.Initialize()\n
         # 2) Make a DrawControl that only lets you draw/modify one rectangle
         dc = DrawControl(
             rectangle={"shapeOptions": {"color": "#00FF00", "weight": 2}},
-            polygon=False, circle=False, circlemarker=False,
-            marker=False, polyline=False
+            polygon=False,
+            circle=False,
+            circlemarker=False,
+            marker=False,
+            polyline=False,
         )
 
         # 3) Define a helper to clear any previous helper‐rectangle
@@ -968,7 +1034,9 @@ ee.Initialize()\n
                 ne = (max(lats), max(lons))
 
                 # show a draggable helper so they see the new box
-                helper = Rectangle(bounds=[sw, ne], name="_bound_editor", draggable=True)
+                helper = Rectangle(
+                    bounds=[sw, ne], name="_bound_editor", draggable=True
+                )
                 self.map.add_layer(helper)
 
                 # finally, re‑assign the real overlay’s bounds
@@ -979,7 +1047,7 @@ ee.Initialize()\n
         # 5) **Add** the DrawControl to the map and keep a reference
         self.bound_draw_control = dc
         self.map.add_control(dc)
-        
+
     def _clear_layers(self, _=None):
         """Remove every overlay (keep only base) and reset the layer list."""
         # 1) Remove map overlays
@@ -995,51 +1063,44 @@ ee.Initialize()\n
 
         # 4) Log it
         self._log("🗑️ Cleared all layers")
-   
+
     def _on_src_change(self, change):
         """
         Display the bounds sliders if the new URL is an image/video,
         otherwise hide them.
         """
-        url = change['new'].strip().lower()
-        is_img = url.endswith(('.png', '.jpg', '.jpeg', '.gif', '.tiff'))
-        is_vid = url.endswith(('.mp4', '.webm'))
+        url = change["new"].strip().lower()
+        is_img = url.endswith((".png", ".jpg", ".jpeg", ".gif", ".tiff"))
+        is_vid = url.endswith((".mp4", ".webm"))
         if is_img or is_vid:
             # unhide and initialize sliders if needed
-            self.bounds_container.layout.display = 'block'
+            self.bounds_container.layout.display = "block"
             # optionally set defaults here, e.g. full‐world extent
-            self.bound_sliders['south'].value = -30
-            self.bound_sliders['west'].value  = -30
-            self.bound_sliders['north'].value = 30
-            self.bound_sliders['east'].value  = 30
+            self.bound_sliders["south"].value = -30
+            self.bound_sliders["west"].value = -30
+            self.bound_sliders["north"].value = 30
+            self.bound_sliders["east"].value = 30
             # set bounds text to match sliders
             self.bounds.value = repr(self._get_slider_bounds())
-        
+
         else:
-            self.bounds_container.layout.display = 'none'
+            self.bounds_container.layout.display = "none"
 
     def _get_slider_bounds(self):
         s = self.bound_sliders
         return (
-            (s['south'].value, s['west'].value),
-            (s['north'].value, s['east'].value)
+            (s["south"].value, s["west"].value),
+            (s["north"].value, s["east"].value),
         )
 
     def _update_overlay_bounds(self, change):
         if self._active_overlay is None:
             return
 
-        sw = (
-            self.bound_sliders['south'].value,
-            self.bound_sliders['west'].value
-        )
-        ne = (
-            self.bound_sliders['north'].value,
-            self.bound_sliders['east'].value
-        )
+        sw = (self.bound_sliders["south"].value, self.bound_sliders["west"].value)
+        ne = (self.bound_sliders["north"].value, self.bound_sliders["east"].value)
         # this immediately resizes the overlay on the map
         self._active_overlay.bounds = (sw, ne)
-
 
 
 def detect_layer_type(path: str) -> str:

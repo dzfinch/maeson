@@ -151,7 +151,7 @@ class Map(Leafmap):
         colormap="greys",
         opacity: float = 1.0,
         zoom_to_layer: bool = True,
-        **kwargs
+        **kwargs,
     ):
         """
         Add a raster (COG) layer to the map and return it.
@@ -177,9 +177,12 @@ class Map(Leafmap):
             The tile layer that was added.
         """
         # 1) If it’s a GitHub “release/download” URL, pull it down locally
-        if filepath.startswith("https://github.com/") and "/releases/download/" in filepath:
-            fname    = os.path.basename(filepath)
-            tmp_dir  = tempfile.gettempdir()
+        if (
+            filepath.startswith("https://github.com/")
+            and "/releases/download/" in filepath
+        ):
+            fname = os.path.basename(filepath)
+            tmp_dir = tempfile.gettempdir()
             local_fp = os.path.join(tmp_dir, fname)
             if not os.path.exists(local_fp):
                 resp = requests.get(filepath, stream=True)
@@ -202,11 +205,7 @@ class Map(Leafmap):
         client = TileClient(filepath)
         layer_name = name or os.path.basename(filepath)
         tile_layer = get_leaflet_tile_layer(
-            client,
-            name=layer_name,
-            colormap=colormap,
-            opacity=opacity,
-            **kwargs
+            client, name=layer_name, colormap=colormap, opacity=opacity, **kwargs
         )
 
         # 4) Add to the map

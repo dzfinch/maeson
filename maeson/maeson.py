@@ -6,8 +6,6 @@ import requests
 import rasterio
 import ipyleaflet
 import ipywidgets
-import folium
-import rasterio
 import localtileserver
 import ee
 import geemap

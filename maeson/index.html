@@ -698,6 +698,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="add_raster()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maeson.maeson.Map.add_raster--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maeson.maeson.Map.add_raster--returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Returns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -965,6 +989,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="add_raster()">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maeson.maeson.Map.add_raster--parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maeson.maeson.Map.add_raster--returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Returns
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -1089,7 +1137,7 @@ Map            (<span title="leafmap.leafmap.Map">Map</span>)
           <summary>Source code in <code>maeson/maeson.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Map</span><span class="p">(</span><span class="n">Leafmap</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;toolbar_control&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;toolbar_control&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;layer_control&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -1197,40 +1245,93 @@ Map            (<span title="leafmap.leafmap.Map">Map</span>)
         <span class="n">vector_layer</span> <span class="o">=</span> <span class="n">ipyleaflet</span><span class="o">.</span><span class="n">GeoJSON</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">vector</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">vector_layer</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">add_raster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;greys&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_raster</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;greys&quot;</span><span class="p">,</span>
+        <span class="n">opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">zoom_to_layer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a raster (COG) layer to the map.</span>
+<span class="sd">        Add a raster (COG) layer to the map and return it.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        filepath (str): Path or URL to the cloud-optimized GeoTIFF (COG).</span>
-<span class="sd">        name (str, optional): Display name for the layer.</span>
-<span class="sd">        colormap (dict or str, optional): A colormap dictionary or a string identifier.</span>
-<span class="sd">        opacity (float, optional): Transparency level (default is 1 for fully opaque).</span>
-<span class="sd">        **kwargs: Additional keyword arguments to pass to the tile layer generator.</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filepath : str</span>
+<span class="sd">            URL or local path to a Cloud‑Optimized GeoTIFF.</span>
+<span class="sd">        name : str, optional</span>
+<span class="sd">            Display name for the layer. Defaults to filename.</span>
+<span class="sd">        colormap : dict or str, optional</span>
+<span class="sd">            A colormap dictionary or registered name (e.g. &quot;viridis&quot;).</span>
+<span class="sd">        opacity : float, optional</span>
+<span class="sd">            0.0 (transparent) – 1.0 (opaque).</span>
+<span class="sd">        zoom_to_layer : bool, optional</span>
+<span class="sd">            If True, fit the map to the raster’s bounds after adding.</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Extra kwargs passed to `get_leaflet_tile_layer`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ipyleaflet.Layer</span>
+<span class="sd">            The tile layer that was added.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">localtileserver</span><span class="w"> </span><span class="kn">import</span> <span class="n">TileClient</span><span class="p">,</span> <span class="n">get_leaflet_tile_layer</span>
+        <span class="c1"># 1) If it’s a GitHub “release/download” URL, pull it down locally</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">filepath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;https://github.com/&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="s2">&quot;/releases/download/&quot;</span> <span class="ow">in</span> <span class="n">filepath</span>
+        <span class="p">):</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+            <span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">()</span>
+            <span class="n">local_fp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">local_fp</span><span class="p">):</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_fp</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">resp</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">):</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+            <span class="n">filepath</span> <span class="o">=</span> <span class="n">local_fp</span>
 
-        <span class="c1"># Open the raster with rasterio to inspect metadata.</span>
+        <span class="c1"># 2) Inspect with rasterio: get colormap if needed + bounds</span>
         <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
-            <span class="c1"># If no colormap is provided (i.e., None), try extracting it from the raster&#39;s first band.</span>
             <span class="k">if</span> <span class="n">colormap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">colormap</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">colormap</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
                 <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                    <span class="c1"># Leave colormap unchanged if extraction fails.</span>
                     <span class="n">colormap</span> <span class="o">=</span> <span class="s2">&quot;greys&quot;</span>
+            <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">bounds</span>
 
-        <span class="c1"># Create the tile client from the provided file path.</span>
+        <span class="c1"># 3) Spin up the tile server + leaflet layer</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">TileClient</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-
-        <span class="c1"># Generate the leaflet tile layer using the provided parameters.</span>
+        <span class="n">layer_name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
         <span class="n">tile_layer</span> <span class="o">=</span> <span class="n">get_leaflet_tile_layer</span><span class="p">(</span>
-            <span class="n">client</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="n">colormap</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="n">client</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">layer_name</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="n">colormap</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
 
-        <span class="c1"># Add the layer to the viewer and update the center and zoom based on the raster metadata.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tile_layer</span><span class="p">)</span>
+        <span class="c1"># 4) Add to the map</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">tile_layer</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="c1"># fallback if your class uses .add() instead</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tile_layer</span><span class="p">)</span>
+
+        <span class="c1"># 5) Ensure it has a valid name</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tile_layer</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tile_layer</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">tile_layer</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">layer_name</span>
+
+        <span class="c1"># 6) Auto‑zoom if requested</span>
+        <span class="k">if</span> <span class="n">zoom_to_layer</span><span class="p">:</span>
+            <span class="n">sw</span> <span class="o">=</span> <span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">left</span><span class="p">)</span>
+            <span class="n">ne</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fit_bounds</span><span class="p">([</span><span class="n">sw</span><span class="p">,</span> <span class="n">ne</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="c1"># if you&#39;re using leafmap you could also call:</span>
+                <span class="c1"># self.zoom_to_layer(tile_layer)</span>
+                <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">tile_layer</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">add_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1902,56 +2003,120 @@ name : str, optional
 
 
 <h3 id="maeson.maeson.Map.add_raster" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">add_raster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="s1">&#39;greys&#39;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">add_raster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="s1">&#39;greys&#39;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">zoom_to_layer</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 
 <a href="#maeson.maeson.Map.add_raster" class="headerlink" title="Permanent link">&para;</a></h3>
 
     <div class="doc doc-contents ">
 
-      <p>Add a raster (COG) layer to the map.</p>
-      <p>filepath (str): Path or URL to the cloud-optimized GeoTIFF (COG).
-name (str, optional): Display name for the layer.
-colormap (dict or str, optional): A colormap dictionary or a string identifier.
-opacity (float, optional): Transparency level (default is 1 for fully opaque).
-**kwargs: Additional keyword arguments to pass to the tile layer generator.</p>
+      <p>Add a raster (COG) layer to the map and return it.</p>
+<h5 id="maeson.maeson.Map.add_raster--parameters">Parameters<a class="headerlink" href="#maeson.maeson.Map.add_raster--parameters" title="Permanent link">&para;</a></h5>
+<p>filepath : str
+    URL or local path to a Cloud‑Optimized GeoTIFF.
+name : str, optional
+    Display name for the layer. Defaults to filename.
+colormap : dict or str, optional
+    A colormap dictionary or registered name (e.g. "viridis").
+opacity : float, optional
+    0.0 (transparent) – 1.0 (opaque).
+zoom_to_layer : bool, optional
+    If True, fit the map to the raster’s bounds after adding.
+**kwargs : dict
+    Extra kwargs passed to <code>get_leaflet_tile_layer</code>.</p>
+<h5 id="maeson.maeson.Map.add_raster--returns">Returns<a class="headerlink" href="#maeson.maeson.Map.add_raster--returns" title="Permanent link">&para;</a></h5>
+<p>ipyleaflet.Layer
+    The tile layer that was added.</p>
 
         <details class="quote">
           <summary>Source code in <code>maeson/maeson.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_raster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;greys&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">add_raster</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">colormap</span><span class="o">=</span><span class="s2">&quot;greys&quot;</span><span class="p">,</span>
+    <span class="n">opacity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">zoom_to_layer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Add a raster (COG) layer to the map.</span>
+<span class="sd">    Add a raster (COG) layer to the map and return it.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    filepath (str): Path or URL to the cloud-optimized GeoTIFF (COG).</span>
-<span class="sd">    name (str, optional): Display name for the layer.</span>
-<span class="sd">    colormap (dict or str, optional): A colormap dictionary or a string identifier.</span>
-<span class="sd">    opacity (float, optional): Transparency level (default is 1 for fully opaque).</span>
-<span class="sd">    **kwargs: Additional keyword arguments to pass to the tile layer generator.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filepath : str</span>
+<span class="sd">        URL or local path to a Cloud‑Optimized GeoTIFF.</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        Display name for the layer. Defaults to filename.</span>
+<span class="sd">    colormap : dict or str, optional</span>
+<span class="sd">        A colormap dictionary or registered name (e.g. &quot;viridis&quot;).</span>
+<span class="sd">    opacity : float, optional</span>
+<span class="sd">        0.0 (transparent) – 1.0 (opaque).</span>
+<span class="sd">    zoom_to_layer : bool, optional</span>
+<span class="sd">        If True, fit the map to the raster’s bounds after adding.</span>
+<span class="sd">    **kwargs : dict</span>
+<span class="sd">        Extra kwargs passed to `get_leaflet_tile_layer`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ipyleaflet.Layer</span>
+<span class="sd">        The tile layer that was added.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">localtileserver</span><span class="w"> </span><span class="kn">import</span> <span class="n">TileClient</span><span class="p">,</span> <span class="n">get_leaflet_tile_layer</span>
+    <span class="c1"># 1) If it’s a GitHub “release/download” URL, pull it down locally</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">filepath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;https://github.com/&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="s2">&quot;/releases/download/&quot;</span> <span class="ow">in</span> <span class="n">filepath</span>
+    <span class="p">):</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+        <span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span><span class="p">()</span>
+        <span class="n">local_fp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">local_fp</span><span class="p">):</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">resp</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">local_fp</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">resp</span><span class="o">.</span><span class="n">iter_content</span><span class="p">(</span><span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">):</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">local_fp</span>
 
-    <span class="c1"># Open the raster with rasterio to inspect metadata.</span>
+    <span class="c1"># 2) Inspect with rasterio: get colormap if needed + bounds</span>
     <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
-        <span class="c1"># If no colormap is provided (i.e., None), try extracting it from the raster&#39;s first band.</span>
         <span class="k">if</span> <span class="n">colormap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">colormap</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">colormap</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-                <span class="c1"># Leave colormap unchanged if extraction fails.</span>
                 <span class="n">colormap</span> <span class="o">=</span> <span class="s2">&quot;greys&quot;</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">bounds</span>
 
-    <span class="c1"># Create the tile client from the provided file path.</span>
+    <span class="c1"># 3) Spin up the tile server + leaflet layer</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">TileClient</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
-
-    <span class="c1"># Generate the leaflet tile layer using the provided parameters.</span>
+    <span class="n">layer_name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
     <span class="n">tile_layer</span> <span class="o">=</span> <span class="n">get_leaflet_tile_layer</span><span class="p">(</span>
-        <span class="n">client</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="n">colormap</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="n">client</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">layer_name</span><span class="p">,</span> <span class="n">colormap</span><span class="o">=</span><span class="n">colormap</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="n">opacity</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span>
 
-    <span class="c1"># Add the layer to the viewer and update the center and zoom based on the raster metadata.</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tile_layer</span><span class="p">)</span>
+    <span class="c1"># 4) Add to the map</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">tile_layer</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="c1"># fallback if your class uses .add() instead</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tile_layer</span><span class="p">)</span>
+
+    <span class="c1"># 5) Ensure it has a valid name</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tile_layer</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tile_layer</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+        <span class="n">tile_layer</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">layer_name</span>
+
+    <span class="c1"># 6) Auto‑zoom if requested</span>
+    <span class="k">if</span> <span class="n">zoom_to_layer</span><span class="p">:</span>
+        <span class="n">sw</span> <span class="o">=</span> <span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">left</span><span class="p">)</span>
+        <span class="n">ne</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_bounds</span><span class="p">([</span><span class="n">sw</span><span class="p">,</span> <span class="n">ne</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="c1"># if you&#39;re using leafmap you could also call:</span>
+            <span class="c1"># self.zoom_to_layer(tile_layer)</span>
+            <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">tile_layer</span>
 </code></pre></div>
         </details>
     </div>

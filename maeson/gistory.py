@@ -1,5 +1,5 @@
 import json
-import ipywidgets as widgets
+import ipywidgets
 import traceback
 from IPython.display import display, FileLink
 import copy, json, asyncio

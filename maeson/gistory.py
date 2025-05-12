@@ -256,7 +256,7 @@ class SceneBuilder:
         )
         self._clear_layers_button.on_click(self._clear_layers)
 
-        # 2) Hidden text store (so any old eval(self.bounds.value) still works)
+        # 2) Hidden text store
         self.bounds = Text(layout=Layout(display="none"))
 
         # 3) Four sliders for South, West, North, East

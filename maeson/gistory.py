@@ -606,7 +606,6 @@ ee.Initialize()\n
             if lt in ("image", "video"):
                 layer_def["bounds"] = self._get_slider_bounds()
 
-            # (we’re no longer handling EE here—EE layers come via custom code)
             self.layers.append(layer_def)
 
         # 6) re‐draw every layer
@@ -878,12 +877,25 @@ ee.Initialize()\n
 
         if t == "tile":
             self.map.add_tile(url=ld["path"], name=name)
-        if ld["type"] == "geojson":
+        elif t == "geojson":
             if "data" in ld:
+                # If GeoJSON data is embedded
                 layer = GeoJSON(data=ld["data"], name=ld.get("name"))
             else:
-                layer = GeoJSON(data=open(ld["path"]).read(), name=ld.get("name"))
-            self.map._add_layer(layer)
+                # If GeoJSON is a URL, fetch and parse it
+                if ld["path"].startswith("http://") or ld["path"].startswith("https://"):
+                    import requests
+                    response = requests.get(ld["path"])
+                    response.raise_for_status()  # Raise an error for bad responses
+                    geojson_data = response.json()  # Parse JSON response
+                    layer = GeoJSON(data=geojson_data, name=ld.get("name"))
+                else:
+                    # Treat as a local file path
+                    import json
+                    with open(ld["path"], "r") as f:
+                        geojson_data = json.load(f)  # Parse JSON file
+                        layer = GeoJSON(data=geojson_data, name=ld.get("name"))
+            self.map.add_layer(layer)
         elif t == "image":
             self.map.add_image(url=ld["path"], bounds=ld["bounds"], name=name)
         elif t == "raster":
@@ -891,12 +903,7 @@ ee.Initialize()\n
         elif t == "wms":
             self.map.add_wms_layer(url=ld["path"], name=name)
         elif t == "video":
-            self.map.add_video(ld["path"], name=name)
-        elif t == "earthengine":
-            import ee
-
-            vis = ld.get("vis_params", {})
-            self.map.add_earthengine(ee_id=ld["ee_id"], vis_params=vis, name=name)
+            self.map.add_video(ld["path"],bounds=ld["bounds"], name=name)
         else:
             self._log(f"❌ Unknown layer type: {t}")
 
@@ -904,25 +911,67 @@ ee.Initialize()\n
         """
         Pan & zoom the map so that the union of all overlay layer bounds is in view.
         """
-        # collect only real, non‐None bounds
-        bboxes = [
-            layer.bounds
-            for layer in self.map.layers[1:]
-            if hasattr(layer, "bounds") and layer.bounds is not None
-        ]
+        # Collect bounds from layers
+        bboxes = []
+
+        for layer in self.map.layers[1:]:
+            # Check if the layer has a 'bounds' attribute
+            if hasattr(layer, "bounds") and layer.bounds is not None:
+                bboxes.append(layer.bounds)
+            # Handle GeoJSON layers by calculating bounds from their data
+            elif isinstance(layer, GeoJSON) and hasattr(layer, "data"):
+                try:
+                    features = layer.data.get("features", [])
+                    coords = [
+                        coord
+                        for feature in features
+                        for coord in self._extract_geojson_coords(feature)
+                    ]
+                    if coords:
+                        lats = [c[1] for c in coords]
+                        lons = [c[0] for c in coords]
+                        bboxes.append(((min(lats), min(lons)), (max(lats), max(lons))))
+                except Exception as e:
+                    self._log(f"⚠️ Failed to calculate bounds for GeoJSON layer: {e}")
+            # Add custom handling for other layer types if needed
+            # Example: Earth Engine layers (if applicable)
+            elif hasattr(layer, "get_bounds"):  # Hypothetical method for EE layers
+                try:
+                    bboxes.append(layer.get_bounds())
+                except Exception as e:
+                    self._log(f"⚠️ Failed to get bounds for layer: {e}")
+
         if not bboxes:
             return self._log("⚠️ No overlay layers to zoom to.")
 
-        # flatten all corner points
+        # Flatten all corner points
         pts = [pt for bb in bboxes for pt in bb]
         lats = [p[0] for p in pts]
         lons = [p[1] for p in pts]
 
+        # Calculate the southwest and northeast corners
         sw = (min(lats), min(lons))
         ne = (max(lats), max(lons))
 
+        # Fit the map to the calculated bounds
         self.map.fit_bounds([sw, ne])
         self._log("🔍 Zoomed to fit all layers.")
+
+    def _extract_geojson_coords(self, feature):
+        """
+        Extract coordinates from a GeoJSON feature.
+        """
+        geometry = feature.get("geometry", {})
+        coords = geometry.get("coordinates", [])
+        if geometry.get("type") == "Point":
+            return [coords]
+        elif geometry.get("type") in ("LineString", "MultiPoint"):
+            return coords
+        elif geometry.get("type") in ("Polygon", "MultiLineString"):
+            return [pt for ring in coords for pt in ring]
+        elif geometry.get("type") == "MultiPolygon":
+            return [pt for polygon in coords for ring in polygon for pt in ring]
+        return []
 
     def _load_def_into_ui(self, layer_def):
         """

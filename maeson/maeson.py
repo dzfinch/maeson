@@ -301,7 +301,7 @@ class Map(Leafmap):
         )
 
         # 3) Add to map and fit to the bounds
-        self.add_layer(overlay)  # or self.map.add_layer if you wrap it
+        self.add_layer(overlay)
         self.fit_bounds(bounds)
 
     def add_wms_layer(self, url, layers, name, format, transparent, **kwargs):

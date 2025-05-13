@@ -609,8 +609,11 @@ ee.Initialize()\n
                 layer = GeoJSON(data=ld["data"], name=ld.get("name"))
             else:
                 # If GeoJSON is a URL, fetch and parse it
-                if ld["path"].startswith("http://") or ld["path"].startswith("https://"):
+                if ld["path"].startswith("http://") or ld["path"].startswith(
+                    "https://"
+                ):
                     import requests
+
                     response = requests.get(ld["path"])
                     response.raise_for_status()  # Raise an error for bad responses
                     geojson_data = response.json()  # Parse JSON response
@@ -618,6 +621,7 @@ ee.Initialize()\n
                 else:
                     # Treat as a local file path
                     import json
+
                     with open(ld["path"], "r") as f:
                         geojson_data = json.load(f)  # Parse JSON file
                         layer = GeoJSON(data=geojson_data, name=ld.get("name"))

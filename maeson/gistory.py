@@ -459,49 +459,6 @@ ee.Initialize()\n
         btn.on_click(callback)
         return btn
 
-    def _add_layer(self, _=None, commit=True):
-        path = self.layer_src.value.strip()
-        lt = detect_layer_type(path)
-        name = f"{lt.upper()}-{len(self.layers)}"
-
-        if lt == "tile":
-            self.map.add_tile(url=path, name=name)
-        elif lt == "geojson":
-            self.map.add_geojson(path=path, name=name)
-        elif lt == "image":
-            bounds = eval(self.bounds.value)
-            self.map.add_image(url=path, bounds=bounds, name=name)
-        elif lt == "raster":
-            self.map.add_raster(path)
-        elif lt == "wms":
-            self.map.add_wms_layer(url=path, name=name)
-        elif lt == "video":
-            self.map.add_video(path, name=name)
-        elif lt == "earthengine":
-            ee_id = self.ee_id.value.strip()
-            vis = json.loads(self.ee_vis.value or "{}")
-            self.map.add_earthengine(ee_id=ee_id, vis_params=vis, name=name)
-        else:
-            return self._log(f"❌ Could not detect layer type for: {path}")
-
-        # only append if commit
-        if commit:
-            self.layers.append(
-                {
-                    "type": lt,
-                    "path": path,
-                    "name": name,
-                    "bounds": eval(self.bounds.value) if lt == "image" else None,
-                    "ee_id": self.ee_id.value.strip() if lt == "earthengine" else None,
-                    "vis_params": (
-                        json.loads(self.ee_vis.value or "{}")
-                        if lt == "earthengine"
-                        else None
-                    ),
-                }
-            )
-        self._log(f"✅ Added {lt} layer: {name}")
-
     def _save_scene(self, _=None):
         # 1) Read metadata
         scene_title = self.title.value.strip() or f"Scene {len(self.story)+1}"
@@ -634,6 +591,47 @@ ee.Initialize()\n
 
         # 8) final log
         self._log(f"✅ Previewed scene with {len(self.layers)} layer(s)")
+
+    def _apply_layer_def(self, ld):
+        """
+        Load a single saved layer_def dict directly onto the map.
+        """
+        t = ld["type"]
+        name = ld.get("name", None)
+
+        self._log(f"→ Applying {t} layer: {name or ld['path']}")
+
+        if t == "tile":
+            self.map.add_tile(url=ld["path"], name=name)
+        elif t == "geojson":
+            if "data" in ld:
+                # If GeoJSON data is embedded
+                layer = GeoJSON(data=ld["data"], name=ld.get("name"))
+            else:
+                # If GeoJSON is a URL, fetch and parse it
+                if ld["path"].startswith("http://") or ld["path"].startswith("https://"):
+                    import requests
+                    response = requests.get(ld["path"])
+                    response.raise_for_status()  # Raise an error for bad responses
+                    geojson_data = response.json()  # Parse JSON response
+                    layer = GeoJSON(data=geojson_data, name=ld.get("name"))
+                else:
+                    # Treat as a local file path
+                    import json
+                    with open(ld["path"], "r") as f:
+                        geojson_data = json.load(f)  # Parse JSON file
+                        layer = GeoJSON(data=geojson_data, name=ld.get("name"))
+            self.map.add_layer(layer)
+        elif t == "image":
+            self.map.add_image(url=ld["path"], bounds=ld["bounds"], name=name)
+        elif t == "raster":
+            self.map.add_raster(ld["path"], name=name)
+        elif t == "wms":
+            self.map.add_wms_layer(url=ld["path"], name=name)
+        elif t == "video":
+            self.map.add_video(ld["path"], bounds=ld["bounds"], name=name)
+        else:
+            self._log(f"❌ Unknown layer type: {t}")
 
     def _copy_scene(self, _=None):
         """
@@ -865,51 +863,6 @@ ee.Initialize()\n
         # reuse your existing handlers
         self._load_scene(None)
         self._preview_scene(None)
-
-    def _apply_layer_def(self, ld):
-        """
-        Load a single saved layer_def dict directly onto the map.
-        """
-        t = ld["type"]
-        name = ld.get("name", None)
-
-        self._log(f"→ Applying {t} layer: {name or ld['path']}")
-
-        if t == "tile":
-            self.map.add_tile(url=ld["path"], name=name)
-        elif t == "geojson":
-            if "data" in ld:
-                # If GeoJSON data is embedded
-                layer = GeoJSON(data=ld["data"], name=ld.get("name"))
-            else:
-                # If GeoJSON is a URL, fetch and parse it
-                if ld["path"].startswith("http://") or ld["path"].startswith(
-                    "https://"
-                ):
-                    import requests
-
-                    response = requests.get(ld["path"])
-                    response.raise_for_status()  # Raise an error for bad responses
-                    geojson_data = response.json()  # Parse JSON response
-                    layer = GeoJSON(data=geojson_data, name=ld.get("name"))
-                else:
-                    # Treat as a local file path
-                    import json
-
-                    with open(ld["path"], "r") as f:
-                        geojson_data = json.load(f)  # Parse JSON file
-                        layer = GeoJSON(data=geojson_data, name=ld.get("name"))
-            self.map.add_layer(layer)
-        elif t == "image":
-            self.map.add_image(url=ld["path"], bounds=ld["bounds"], name=name)
-        elif t == "raster":
-            self.map.add_raster(ld["path"], name=name)
-        elif t == "wms":
-            self.map.add_wms_layer(url=ld["path"], name=name)
-        elif t == "video":
-            self.map.add_video(ld["path"], bounds=ld["bounds"], name=name)
-        else:
-            self._log(f"❌ Unknown layer type: {t}")
 
     def _zoom_to_layers(self, _):
         """

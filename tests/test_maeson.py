@@ -2,7 +2,6 @@
 
 """Tests for `maeson` package."""
 
-
 import unittest
 
 from maeson import maeson

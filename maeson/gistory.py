@@ -403,8 +403,7 @@ class SceneBuilder:
     def _initialize_code_editor(self):
         """Textarea + Run button for custom Python snippets."""
         self.custom_code = Textarea(
-            value=(
-                """import ee
+            value=("""import ee
 ee.Initialize()\n
 # Example: add an Earth Engine image to the map
 # map.add_earthengine(
@@ -412,8 +411,7 @@ ee.Initialize()\n
 #    vis_params={"min":0,"max":3000},
 #    name="My EE Layer"
 #)
-"""
-            ),
+"""),
             layout=Layout(width="100%", height="150px"),
         )
         self.code_container = VBox(
